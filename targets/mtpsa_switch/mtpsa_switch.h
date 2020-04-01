@@ -120,6 +120,10 @@ class MtPsaSwitch : public Switch {
     return counter->reset_counters();
   }
 
+  void set_nbusers(unsigned value) {
+    nbusers = value;
+  }
+
  private:
   static constexpr size_t nb_user_threads = 4u;
   static constexpr port_t MTPSA_PORT_RECIRCULATE = 0xfffffffa;
@@ -177,6 +181,7 @@ class MtPsaSwitch : public Switch {
   clock::time_point start;
   std::unordered_map<mirror_id_t, port_t> mirroring_map;
   bool with_queueing_metadata{false};
+  unsigned nbusers;
 };
 
 }  // namespace bm::mtpsa

@@ -1,36 +1,16 @@
 #!/usr/bin/env python2
 
-# Copyright 2013-present Barefoot Networks, Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#   http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-
-#
-# Antonin Bas (antonin@barefootnetworks.com)
-#
-#
-
 import runtime_CLI
 
 import sys
 import os
 
-from pswitch_runtime import PsaSwitch
+from mtpswitch_runtime import MtPsaSwitch
 
-class PsaSwitchAPI(runtime_CLI.RuntimeAPI):
+class MtPsaSwitchAPI(runtime_CLI.RuntimeAPI):
     @staticmethod
     def get_thrift_services():
-        return [("psa_switch", PsaSwitch.Client)]
+        return [("mtpsa_switch", MtPsaSwitch.Client)]
 
     def __init__(self, pre_type, standard_client, mc_client, pswitch_client):
         runtime_CLI.RuntimeAPI.__init__(self, pre_type,
@@ -82,7 +62,7 @@ def main():
     args.pre = runtime_CLI.PreType.SimplePreLAG
 
     services = runtime_CLI.RuntimeAPI.get_thrift_services(args.pre)
-    services.extend(PsaSwitchAPI.get_thrift_services())
+    services.extend(MtPsaSwitchAPI.get_thrift_services())
 
     standard_client, mc_client, pswitch_client = runtime_CLI.thrift_connect(
         args.thrift_ip, args.thrift_port, services
@@ -90,7 +70,7 @@ def main():
 
     runtime_CLI.load_json_config(standard_client, args.json)
 
-    PsaSwitchAPI(args.pre, standard_client, mc_client, pswitch_client).cmdloop()
+    MtPsaSwitchAPI(args.pre, standard_client, mc_client, pswitch_client).cmdloop()
 
 if __name__ == '__main__':
     main()

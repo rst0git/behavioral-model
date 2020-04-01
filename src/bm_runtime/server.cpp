@@ -140,7 +140,8 @@ int start_server(bm::SwitchWContexts *sw, int port) {
   bm::Logger::get()->info("Starting Thrift server on port {}", port);
   std::thread server_thread(serve, port);
   std::unique_lock<std::mutex> lock(m_ready);
-  while(!ready) cv_ready.wait(lock);
+  while(!ready)
+    cv_ready.wait(lock);
   server_thread.detach();
   bm::Logger::get()->info("Thrift server was started");
   return 0;

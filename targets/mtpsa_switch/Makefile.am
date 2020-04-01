@@ -16,10 +16,10 @@ $(top_builddir)/third_party/jsoncpp/libjson.la \
 if COND_THRIFT
 
 mtpsa_switch_thrift_py_files = \
-gen-py/pswitch_runtime/constants.py \
-gen-py/pswitch_runtime/__init__.py \
-gen-py/pswitch_runtime/MtPsaSwitch.py \
-gen-py/pswitch_runtime/ttypes.py
+gen-py/mtpswitch_runtime/constants.py \
+gen-py/mtpswitch_runtime/__init__.py \
+gen-py/mtpswitch_runtime/MtPsaSwitch.py \
+gen-py/mtpswitch_runtime/ttypes.py
 mtpsa_switch_thrift_files = \
 gen-cpp/bm/mtpsa_switch_constants.cpp \
 gen-cpp/bm/mtpsa_switch_constants.h \
@@ -30,10 +30,10 @@ gen-cpp/bm/mtpsa_switch_types.h
 
 BUILT_SOURCES = $(mtpsa_switch_thrift_files) $(mtpsa_switch_thrift_py_files)
 
-pswitchpydir = $(pythondir)/pswitch_runtime
+pswitchpydir = $(pythondir)/mtpswitch_runtime
 nodist_pswitchpy_PYTHON = $(mtpsa_switch_thrift_py_files)
 
-python_PYTHON = pswitch_CLI.py
+python_PYTHON = mtpswitch_CLI.py
 
 # See
 # http://www.gnu.org/software/autoconf/manual/autoconf-2.69/html_node/Installation-Directory-Variables.html
@@ -90,10 +90,10 @@ thrift_files.ts: $(THRIFT_IDL)
 	@mkdir -p $(builddir)/gen-cpp/bm
 	$(THRIFT) -out $(builddir)/gen-cpp/bm --gen cpp -r $(THRIFT_IDL)
 	$(THRIFT) -o $(builddir) --gen py -r $(THRIFT_IDL)
-	if mkdir $(srcdir)/pswitch_runtime.test 2>/dev/null; then \
-	  rm -rf $(srcdir)/pswitch_runtime/; \
-	  cp -r $(builddir)/gen-py/pswitch_runtime/ $(srcdir)/; \
-	  rm -rf $(srcdir)/pswitch_runtime.test; else :; \
+	if mkdir $(srcdir)/mtpswitch_runtime.test 2>/dev/null; then \
+	  rm -rf $(srcdir)/mtpswitch_runtime/; \
+	  cp -r $(builddir)/gen-py/mtpswitch_runtime/ $(srcdir)/; \
+	  rm -rf $(srcdir)/mtpswitch_runtime.test; else :; \
         fi
 	@mv -f thrift_files.tmp $@
 

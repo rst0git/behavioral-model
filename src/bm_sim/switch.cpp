@@ -54,8 +54,11 @@ packet_handler(int port_num, const char *buffer, int len, void *cookie) {
 // TODO(antonin): maybe a factory method would be more appropriate for Switch
 SwitchWContexts::SwitchWContexts(size_t nb_cxts, bool enable_swap)
   : DevMgr(),
-    nb_cxts(nb_cxts), contexts(nb_cxts), enable_swap(enable_swap),
-    phv_source(PHVSourceIface::make_phv_source(nb_cxts)) {
+    nb_cxts(nb_cxts),
+    contexts(nb_cxts),
+    enable_swap(enable_swap),
+    phv_source(PHVSourceIface::make_phv_source(nb_cxts))
+{
   for (size_t i = 0; i < nb_cxts; i++) {
     contexts.at(i).set_cxt_id(i);
   }
@@ -208,9 +211,12 @@ SwitchWContexts::init_objects_empty(device_id_t dev_id,
 
 int
 SwitchWContexts::init_from_command_line_options(
-    int argc, char *argv[], TargetParserIface *tp,
+    int argc,
+    char *argv[],
+    TargetParserIface *tp,
     std::shared_ptr<TransportIface> my_transport,
-    std::unique_ptr<DevMgrIface> my_dev_mgr) {
+    std::unique_ptr<DevMgrIface> my_dev_mgr)
+{
   OptionsParser parser;
   parser.parse(argc, argv, tp);
   return init_from_options_parser(parser, my_transport, std::move(my_dev_mgr));
@@ -220,7 +226,8 @@ int
 SwitchWContexts::init_from_options_parser(
     const OptionsParser &parser,
     std::shared_ptr<TransportIface> my_transport,
-    std::unique_ptr<DevMgrIface> my_dev_mgr) {
+    std::unique_ptr<DevMgrIface> my_dev_mgr)
+{
   int status = 0;
 
   auto transport = my_transport;
@@ -260,7 +267,9 @@ SwitchWContexts::init_from_options_parser(
     status = init_objects_empty(parser.device_id, transport);
   else
     status = init_objects(parser.config_file_path, parser.device_id, transport);
-  if (status != 0) return status;
+
+  if (status != 0)
+    return status;
 
   if (my_dev_mgr != nullptr)
     set_dev_mgr(std::move(my_dev_mgr));
@@ -338,12 +347,14 @@ SwitchWContexts::init_from_options_parser(
 // basis, but this could easily be changed
 RuntimeInterface::ErrorCode
 SwitchWContexts::load_new_config(const std::string &new_config) {
-  if (!enable_swap) return ErrorCode::CONFIG_SWAP_DISABLED;
+  if (!enable_swap)
+    return ErrorCode::CONFIG_SWAP_DISABLED;
+
   std::istringstream ss(new_config);
   for (auto &cxt : contexts) {
-    ErrorCode rc = cxt.load_new_config(&ss, get_lookup_factory(),
-                                       required_fields, arith_objects);
-    if (rc != ErrorCode::SUCCESS) return rc;
+    ErrorCode rc = cxt.load_new_config(&ss, get_lookup_factory(), required_fields, arith_objects);
+    if (rc != ErrorCode::SUCCESS)
+      return rc;
     ss.clear();
     ss.seekg(0, std::ios::beg);
   }
@@ -566,8 +577,7 @@ SwitchWContexts::transport_send_probe(uint64_t x) const {
 
 // Switch convenience class
 
-Switch::Switch(bool enable_swap)
-    : SwitchWContexts(1u, enable_swap) { }
+Switch::Switch(bool enable_swap) : SwitchWContexts(1u, enable_swap) { }
 
 std::unique_ptr<Packet>
 Switch::new_packet_ptr(port_t ingress_port,
