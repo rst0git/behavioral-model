@@ -44,8 +44,7 @@ class MtPsaSwitchAPI(runtime_CLI.RuntimeAPI):
 
     def do_mirroring_delete(self, line):
         """Delete mirroring mapping: mirroring_delete <mirror_id>"""
-        mirror_id = int(line)
-        self.pswitch_client.mirroring_mapping_delete(mirror_id)
+        self.pswitch_client.mirroring_mapping_delete(int(line))
 
     def do_get_time_elapsed(self, line):
         """Get time elapsed (in microseconds) since the switch started: get_time_elapsed"""

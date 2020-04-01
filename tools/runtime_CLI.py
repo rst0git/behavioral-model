@@ -943,9 +943,12 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_table_add(self, line):
-        "Add entry to a match table: table_add <table name> <action name> <match fields> => <action parameters> [priority]"
+        """Add entry to a match table: table_add <table name> <action name> <match fields> => <action parameters> [priority]"""
         args = line.split()
         self.at_least_n_args(args, 3)
+        if not '=>' in args:
+            raise UIn_Error("Separator '=>' is misssing. See 'help table_add'")
+
         table_name, action_name = args[0], args[1]
         table = self.get_res("table", table_name, ResType.table)
         action = table.get_action(action_name)
@@ -959,10 +962,7 @@ class RuntimeAPI(cmd.Cmd):
         else:
             priority = 0
 
-        for idx, input_ in enumerate(args[2:]):
-            if input_ == "=>":
-                break
-        idx += 2
+        idx = args.index('=>')
         match_key = args[2:idx]
         action_params = args[idx+1:]
         if len(match_key) != table.num_key_fields():

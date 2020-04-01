@@ -173,8 +173,7 @@ class MtPsaSwitch : public Switch {
  private:
   std::vector<std::thread> threads_;
   Queue<std::unique_ptr<Packet>> input_buffer;
-  bm::QueueingLogicRL<std::unique_ptr<Packet>, EgressThreadMapper>
-  egress_buffers;
+  bm::QueueingLogicRL<std::unique_ptr<Packet>, EgressThreadMapper> egress_buffers;
   Queue<std::unique_ptr<Packet>> output_buffer;
   TransmitFn my_transmit_fn;
   std::shared_ptr<McSimplePreLAG> pre;
