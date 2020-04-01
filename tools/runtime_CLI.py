@@ -675,38 +675,6 @@ def handle_bad_input_mc(f):
             print("Invalid PRE operation (%s)" % error)
     return handle
 
-def deprecated_act_prof(substitute, with_selection=False, strictly_deprecated=True):
-    # need two levels here because our decorator takes arguments
-    def deprecated_act_prof_(f):
-        # not sure if this is the right place for it, if I want it to play nice
-        # with @wraps
-        if strictly_deprecated:
-            f.__doc__ = "[DEPRECATED!] " + f.__doc__
-            f.__doc__ += "\nUse '{}' instead".format(substitute)
-        @wraps(f)
-        def wrapper(obj, line):
-            substitute_fn = getattr(obj, "do_" + substitute)
-            args = line.split()
-            obj.at_least_n_args(args, 1)
-            table_name = args[0]
-            table = obj.get_res("table", table_name, ResType.table)
-            if with_selection:
-                obj.check_indirect_ws(table)
-            else:
-                obj.check_indirect(table)
-            assert(table.action_prof is not None)
-            assert(table.action_prof.ref_cnt > 0)
-            if strictly_deprecated and table.action_prof.ref_cnt > 1:
-                raise UIn_Error("Legacy command does not work with shared action profiles")
-            args[0] = table.action_prof.name
-            if strictly_deprecated:
-                # writing to stderr in case someone is parsing stdout
-                sys.stderr.write("This is a deprecated command, use '{}' instead\n".format(substitute))
-            return substitute_fn(" ".join(args))
-        # we add the handle_bad_input decorator "programatically"
-        return handle_bad_input(wrapper)
-    return deprecated_act_prof_
-
 # thrift does not support unsigned integers
 def hex_to_i16(h):
     x = int(h, 0)
@@ -820,7 +788,7 @@ class RuntimeAPI(cmd.Cmd):
         """List actions defined in the P4 program: show_actions"""
         self.exactly_n_args(line.split(), 0)
         for action_name in sorted(ACTIONS):
-            print ACTIONS[action_name].action_str()
+            print(ACTIONS[action_name].action_str())
 
     def _complete_tables(self, text):
         return self._complete_res(TABLES, text)
@@ -1114,11 +1082,6 @@ class RuntimeAPI(cmd.Cmd):
     def complete_act_prof_create_member(self, text, line, start_index, end_index):
         return self._complete_act_prof_and_action(text, line)
 
-    @deprecated_act_prof("act_prof_create_member")
-    def do_table_indirect_create_member(self, line):
-        """Add a member to an indirect match table: table_indirect_create_member <table name> <action_name> [action parameters]"""
-        pass
-
     def complete_table_indirect_create_member(self, text, line, start_index, end_index):
         return self._complete_table_and_action(text, line)
 
@@ -1137,11 +1100,6 @@ class RuntimeAPI(cmd.Cmd):
 
     def complete_act_prof_delete_member(self, text, line, start_index, end_index):
         return self._complete_act_profs(text)
-
-    @deprecated_act_prof("act_prof_delete_member")
-    def do_table_indirect_delete_member(self, line):
-        """Delete a member in an indirect match table: table_indirect_delete_member <table name> <member handle>"""
-        pass
 
     def complete_table_indirect_delete_member(self, text, line, start_index, end_index):
         return self._complete_tables(text)
@@ -1169,11 +1127,6 @@ class RuntimeAPI(cmd.Cmd):
 
     def complete_act_prof_modify_member(self, text, line, start_index, end_index):
         return self._complete_act_prof_and_action(text, line)
-
-    @deprecated_act_prof("act_prof_modify_member")
-    def do_table_indirect_modify_member(self, line):
-        "Modify member in an indirect match table: table_indirect_modify_member <table name> <action_name> <member_handle> [action parameters]"
-        pass
 
     def complete_table_indirect_modify_member(self, text, line, start_index, end_index):
         return self._complete_table_and_action(text, line)
@@ -1308,11 +1261,6 @@ class RuntimeAPI(cmd.Cmd):
     def complete_act_prof_create_group(self, text, line, start_index, end_index):
         return self._complete_act_profs(text)
 
-    @deprecated_act_prof("act_prof_create_group", with_selection=True)
-    def do_table_indirect_create_group(self, line):
-        """Add a group to an indirect match table: table_indirect_create_group <table name>"""
-        pass
-
     def complete_table_indirect_create_group(self, text, line, start_index, end_index):
         return self._complete_tables(text)
 
@@ -1332,11 +1280,6 @@ class RuntimeAPI(cmd.Cmd):
 
     def complete_act_prof_delete_group(self, text, line, start_index, end_index):
         return self._complete_act_profs(text)
-
-    @deprecated_act_prof("act_prof_delete_group", with_selection=True)
-    def do_table_indirect_delete_group(self, line):
-        "Delete a group: table_indirect_delete_group <table name> <group handle>"
-        pass
 
     def complete_table_indirect_delete_group(self, text, line, start_index, end_index):
         return self._complete_tables(text)
@@ -1370,51 +1313,32 @@ class RuntimeAPI(cmd.Cmd):
     def complete_act_prof_add_member_to_group(self, text, line, start_index, end_index):
         return self._complete_act_profs(text)
 
-    @deprecated_act_prof("act_prof_add_member_to_group", with_selection=True)
-    def do_table_indirect_add_member_to_group(self, line):
-        "Add member to group: table_indirect_add_member_to_group <table name> <member handle> <group handle>"
-        pass
-
     def complete_table_indirect_add_member_to_group(self, text, line, start_index, end_index):
         return self._complete_tables(text)
 
     @handle_bad_input
     def do_act_prof_remove_member_from_group(self, line):
-        "Remove member from group in action profile: act_prof_remove_member_from_group <action profile name> <member handle> <group handle>"
+        """Remove member from group in action profile: act_prof_remove_member_from_group <action profile name> <member handle> <group handle>"""
         args = line.split()
-
         self.exactly_n_args(args, 3)
-
         act_prof_name = args[0]
-        act_prof = self.get_res("action profile", act_prof_name,
-                                ResType.action_prof)
-
+        act_prof = self.get_res("action profile", act_prof_name, ResType.action_prof)
         self.check_act_prof_ws(act_prof)
-
         try:
             mbr_handle = int(args[1])
         except:
             raise UIn_Error("Bad format for member handle")
-
         try:
             grp_handle = int(args[2])
         except:
             raise UIn_Error("Bad format for group handle")
-
-        self.client.bm_mt_act_prof_remove_member_from_group(
-            0, act_prof.name, mbr_handle, grp_handle)
+        self.client.bm_mt_act_prof_remove_member_from_group(0, act_prof.name, mbr_handle, grp_handle)
 
     def complete_act_prof_remove_member_from_group(self, text, line, start_index, end_index):
         return self._complete_act_profs(text)
 
-    @deprecated_act_prof("act_prof_remove_member_from_group", with_selection=True)
-    def do_table_indirect_remove_member_from_group(self, line):
-        "Remove member from group: table_indirect_remove_member_from_group <table name> <member handle> <group handle>"
-        pass
-
     def complete_table_indirect_remove_member_from_group(self, text, line, start_index, end_index):
         return self._complete_tables(text)
-
 
     def check_has_pre(self):
         if self.pre_type == PreType.None:
@@ -1428,23 +1352,23 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input_mc
     def do_mc_mgrp_create(self, line):
-        "Create multicast group: mc_mgrp_create <group id>"
+        """Create multicast group: mc_mgrp_create <group id>"""
         self.check_has_pre()
         args = line.split()
         self.exactly_n_args(args, 1)
         mgrp = self.get_mgrp(args[0])
-        print "Creating multicast group", mgrp
+        print("Creating multicast group", mgrp)
         mgrp_hdl = self.mc_client.bm_mc_mgrp_create(0, mgrp)
         assert(mgrp == mgrp_hdl)
 
     @handle_bad_input_mc
     def do_mc_mgrp_destroy(self, line):
-        "Destroy multicast group: mc_mgrp_destroy <group id>"
+        """Destroy multicast group: mc_mgrp_destroy <group id>"""
         self.check_has_pre()
         args = line.split()
         self.exactly_n_args(args, 1)
         mgrp = self.get_mgrp(args[0])
-        print "Destroying multicast group", mgrp
+        print("Destroying multicast group", mgrp)
         self.mc_client.bm_mc_mgrp_destroy(0, mgrp)
 
     def ports_to_port_map_str(self, ports, description="port"):
@@ -1455,17 +1379,14 @@ class RuntimeAPI(cmd.Cmd):
             try:
                 port_num = int(port_num_str)
             except:
-                raise UIn_Error("'%s' is not a valid %s number"
-                                "" % (port_num_str, description))
+                raise UIn_Error("'%s' is not a valid %s number" % (port_num_str, description))
             if port_num < 0:
-                raise UIn_Error("'%s' is not a valid %s number"
-                                "" % (port_num_str, description))
+                raise UIn_Error("'%s' is not a valid %s number" % (port_num_str, description))
             ports_int.append(port_num)
         ports_int.sort()
         for port_num in ports_int:
             if port_num == (last_port_num - 1):
-                raise UIn_Error("Found duplicate %s number '%s'"
-                                "" % (description, port_num))
+                raise UIn_Error("Found duplicate %s number '%s'" % (description, port_num))
             port_map_str += "0" * (port_num - last_port_num) + "1"
             last_port_num = port_num + 1
         return port_map_str[::-1]
@@ -1497,12 +1418,12 @@ class RuntimeAPI(cmd.Cmd):
             raise UIn_Error("Bad format for rid")
         port_map_str, lag_map_str = self.parse_ports_and_lags(args)
         if self.pre_type == PreType.SimplePre:
-            print "Creating node with rid", rid, "and with port map", port_map_str
+            print("Creating node with rid", rid, "and with port map", port_map_str)
             l1_hdl = self.mc_client.bm_mc_node_create(0, rid, port_map_str)
         else:
-            print "Creating node with rid", rid, ", port map", port_map_str, "and lag map", lag_map_str
+            print("Creating node with rid", rid, ", port map", port_map_str, "and lag map", lag_map_str)
             l1_hdl = self.mc_client.bm_mc_node_create(0, rid, port_map_str, lag_map_str)
-        print "node was created with handle", l1_hdl
+        print("node was created with handle", l1_hdl)
 
     def get_node_handle(self, s):
         try:
@@ -1519,10 +1440,10 @@ class RuntimeAPI(cmd.Cmd):
         l1_hdl = self.get_node_handle(args[0])
         port_map_str, lag_map_str = self.parse_ports_and_lags(args)
         if self.pre_type == PreType.SimplePre:
-            print "Updating node", l1_hdl, "with port map", port_map_str
+            print("Updating node", l1_hdl, "with port map", port_map_str)
             self.mc_client.bm_mc_node_update(0, l1_hdl, port_map_str)
         else:
-            print "Updating node", l1_hdl, "with port map", port_map_str, "and lag map", lag_map_str
+            print("Updating node", l1_hdl, "with port map", port_map_str, "and lag map", lag_map_str)
             self.mc_client.bm_mc_node_update(0, l1_hdl, port_map_str, lag_map_str)
 
     @handle_bad_input_mc
@@ -1575,13 +1496,13 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input_mc
     def do_mc_dump(self, line):
-        "Dump entries in multicast engine"
+        """Dump entries in multicast engine"""
         self.check_has_pre()
         json_dump = self.mc_client.bm_mc_get_entries(0)
         try:
             mc_json = json.loads(json_dump)
         except:
-            print "Exception when retrieving MC entries"
+            print("Exception when retrieving MC entries")
             return
 
         l1_handles = {}
@@ -1592,18 +1513,18 @@ class RuntimeAPI(cmd.Cmd):
             l2_handles[h["handle"]] = (h["ports"], h["lags"])
 
         print("==========")
-        print "MC ENTRIES"
+        print("MC ENTRIES")
         for mgrp in mc_json["mgrps"]:
             print("**********")
             mgid = mgrp["id"]
-            print "mgrp({})".format(mgid)
+            print("mgrp({})".format(mgid))
             for L1h in mgrp["l1_handles"]:
                 rid, L2h = l1_handles[L1h]
-                print "  -> (L1h={}, rid={})".format(L1h, rid),
+                print("  -> (L1h={}, rid={})".format(L1h, rid))
                 ports, lags = l2_handles[L2h]
-                print "-> (ports=[{}], lags=[{}])".format(
+                print("-> (ports=[{}], lags=[{}])".format(
                     ", ".join([str(p) for p in ports]),
-                    ", ".join([str(l) for l in lags]))
+                    ", ".join([str(l) for l in lags])))
 
         print("==========")
         print("LAGS")
@@ -1883,9 +1804,8 @@ class RuntimeAPI(cmd.Cmd):
             self.dump_one_member(m)
 
     def dump_one_group(self, group):
-        print "Dumping group {}".format(group.grp_handle)
-        print "Members: [{}]".format(", ".join(
-            [str(h) for h in group.mbr_handles]))
+        print("Dumping group {}".format(group.grp_handle))
+        print("Members: [{}]".format(", ".join([str(h) for h in group.mbr_handles])))
 
     def dump_groups(self, groups):
         for g in groups:
@@ -1962,14 +1882,6 @@ class RuntimeAPI(cmd.Cmd):
     def complete_act_prof_dump_member(self, text, line, start_index, end_index):
         return self._complete_act_profs(text)
 
-    # notice the strictly_deprecated=False; I don't consider this command to be
-    # strictly deprecated because it can be convenient and does not modify the
-    # action profile so won't create problems
-    @deprecated_act_prof("act_prof_dump_member", with_selection=False, strictly_deprecated=False)
-    def do_table_dump_member(self, line):
-        """Display some information about a member: table_dump_member <table name> <member handle>"""
-        pass
-
     def complete_table_dump_member(self, text, line, start_index, end_index):
         return self._complete_tables(text)
 
@@ -1989,11 +1901,6 @@ class RuntimeAPI(cmd.Cmd):
 
     def complete_act_prof_dump_group(self, text, line, start_index, end_index):
         return self._complete_act_profs(text)
-
-    @deprecated_act_prof("act_prof_dump_group", with_selection=False, strictly_deprecated=False)
-    def do_table_dump_group(self, line):
-        """Display some information about a group: table_dump_group <table name> <group handle>"""
-        pass
 
     def complete_table_dump_group(self, text, line, start_index, end_index):
         return self._complete_tables(text)
@@ -2079,10 +1986,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_show_pvs(self, line):
-        "List parser value sets defined in the P4 program: show_pvs"
+        """List parser value sets defined in the P4 program: show_pvs"""
         self.exactly_n_args(line.split(), 0)
         for pvs_name in sorted(PARSE_VSETS):
-            print PARSE_VSETS[pvs_name].parse_vset_str()
+            print(PARSE_VSETS[pvs_name].parse_vset_str())
 
     @handle_bad_input
     def do_pvs_add(self, line):
@@ -2131,16 +2038,14 @@ class RuntimeAPI(cmd.Cmd):
 
         values = self.client.bm_parse_vset_get(0, pvs_name)
         for v in values:
-            print hexstr(v)
+            print(hexstr(v))
 
     def complete_pvs_get(self, text, line, start_index, end_index):
         return self._complete_pvs(text)
 
     @handle_bad_input
     def do_pvs_clear(self, line):
-        """
-        Remove all values from a parser value set: pvs_clear <pvs_name>
-        """
+        """Remove all values from a parser value set: pvs_clear <pvs_name>"""
         args = line.split()
         self.exactly_n_args(args, 1)
         pvs_name = args[0]
@@ -2197,7 +2102,7 @@ class RuntimeAPI(cmd.Cmd):
         attributes = [t[2] for t in info.thrift_spec[1:]]
         out_attr_w = 5 + max(len(a) for a in attributes)
         for a in attributes:
-            print "{:{w}}: {}".format(a, getattr(info, a), w=out_attr_w)
+            print("{:{w}}: {}".format(a, getattr(info, a), w=out_attr_w))
 
     @handle_bad_input
     def do_reset_state(self, line):
@@ -2241,15 +2146,14 @@ class RuntimeAPI(cmd.Cmd):
         thrift_fn(0, name, crc_config)
 
     def _complete_crc(self, text, crc_width=16):
-        crcs = sorted(
-            [c for c, w in CUSTOM_CRC_CALCS.items() if w == crc_width])
+        crcs = sorted([c for c, w in CUSTOM_CRC_CALCS.items() if w == crc_width])
         if not text:
             return crcs
         return [c for c in crcs if c.startswith(text)]
 
     @handle_bad_input
     def do_set_crc16_parameters(self, line):
-        "Change the parameters for a custom crc16 hash: set_crc16_parameters <name> <polynomial> <initial remainder> <final xor value> <reflect data?> <reflect remainder?>"
+        """Change the parameters for a custom crc16 hash: set_crc16_parameters <name> <polynomial> <initial remainder> <final xor value> <reflect data?> <reflect remainder?>"""
         self.set_crc_parameters_common(line, 16)
 
     def complete_set_crc16_parameters(self, text, line, start_index, end_index):
