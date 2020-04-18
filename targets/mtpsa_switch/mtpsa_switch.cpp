@@ -80,6 +80,8 @@ MtPsaSwitch::MtPsaSwitch(bool enable_swap)
   add_required_field("mtpsa_ingress_output_metadata", "multicast_group");
   add_required_field("mtpsa_ingress_output_metadata", "egress_port");
 
+  add_required_field("mtpsa_ingress_output_metadata", "user_id");
+
   add_required_field("mtpsa_egress_parser_input_metadata", "egress_port");
   add_required_field("mtpsa_egress_parser_input_metadata", "packet_path");
 
