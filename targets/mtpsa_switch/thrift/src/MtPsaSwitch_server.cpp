@@ -62,6 +62,11 @@ class MtPsaSwitchHandler : virtual public MtPsaSwitchIf {
     return switch_->set_all_egress_queue_rates(static_cast<uint64_t>(rate_pps));
   }
 
+  int32_t load_user_config(const int32_t user_id, const std::string &new_config) {
+    bm::Logger::get()->trace("load_user_config");
+    return switch_->load_user_config(user_id, new_config);
+  }
+
   int64_t get_time_elapsed_us() {
     bm::Logger::get()->trace("get_time_elapsed_us");
     // cast from unsigned to signed

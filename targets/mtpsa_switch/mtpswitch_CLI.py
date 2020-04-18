@@ -4,6 +4,7 @@ import runtime_CLI
 
 import sys
 import os
+import json
 
 from mtpswitch_runtime import MtPsaSwitch
 
@@ -53,6 +54,29 @@ class MtPsaSwitchAPI(runtime_CLI.RuntimeAPI):
     def do_get_time_since_epoch(self, line):
         """Get time elapsed (in microseconds) since the switch clock's epoch: get_time_since_epoch"""
         print(self.pswitch_client.get_time_since_epoch_us())
+
+    def do_load_user_config(self, line):
+        """Load user json config: load_user_config <UserID> <path to .json file>"""
+        args = line.split()
+        self.exactly_n_args(args, 2)
+        user_id = int(args[0])
+        filename = args[1]
+
+        if not os.path.isfile(filename):
+            print("Error: Invalid filename: " + filename)
+            return
+
+        if 1 > user_id or user_id > 16:
+            print("Error: UserID must be between 1 and 16")
+            return
+
+        print("Loading json config")
+        with open(filename, 'r') as f:
+            json_str = f.read()
+            json.loads(json_str)
+            if self.pswitch_client.load_user_config(user_id, json_str):
+                print("Error: Failed to load user config")
+                return
 
 def main():
     args = runtime_CLI.get_parser().parse_args()

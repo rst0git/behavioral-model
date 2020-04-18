@@ -63,6 +63,7 @@ class MtPsaSwitch : public Switch {
 
   int set_egress_queue_rate(size_t port, const uint64_t rate_pps);
   int set_all_egress_queue_rates(const uint64_t rate_pps);
+  int load_user_config(size_t user_id, const std::string &new_config);
 
   uint64_t get_time_elapsed_us() const;
 

@@ -20,7 +20,7 @@ if [ $# -gt 2 ]; then
     exit 1
 fi
 
-CLI=$THIS_DIR/pswitch_CLI.py
+CLI=$THIS_DIR/mtpswitch_CLI.py
 TOOLS_DIR=$THIS_DIR/../../tools/
 
 PYTHONPATH=$PYTHONPATH:$TOOLS_DIR python $CLI $json $port

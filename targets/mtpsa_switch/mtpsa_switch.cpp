@@ -181,6 +181,13 @@ MtPsaSwitch::set_all_egress_queue_rates(const uint64_t rate_pps) {
   return 0;
 }
 
+int
+MtPsaSwitch::load_user_config(size_t user_id, const std::string &new_config) {
+  if (new_config.length() > 0 && user_id > 0)
+    return 0;
+  return -1;
+}
+
 uint64_t
 MtPsaSwitch::get_time_elapsed_us() const {
   return get_ts().count();
