@@ -86,13 +86,11 @@ int serve(int port) {
   shared_ptr<TMultiplexedProcessor> processor(new TMultiplexedProcessor());
   processor_ = processor.get();
 
-  fprintf(stderr, ">> register standard processor\n");
   processor->registerProcessor(
       "standard",
       shared_ptr<TProcessor>(new StandardProcessor(standard::get_handler(switch_)))
   );
 
-  fprintf(stderr, ">> register simple_pre processor\n");
   if(switch_has_component<bm::McSimplePre>()) {
     processor->registerProcessor(
         "simple_pre",
@@ -100,7 +98,6 @@ int serve(int port) {
     );
   }
 
-  fprintf(stderr, ">> register simple_pre_lag processor\n");
   if(switch_has_component<bm::McSimplePreLAG>()) {
     processor->registerProcessor(
         "simple_pre_lag",
@@ -118,7 +115,6 @@ int serve(int port) {
     cv_ready.notify_one();
   }
 
-  fprintf(stderr, ">> start server\n");
   TThreadedServer server(processor, serverTransport, transportFactory,
                          protocolFactory);
   try {
