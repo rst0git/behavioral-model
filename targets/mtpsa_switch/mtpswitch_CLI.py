@@ -66,8 +66,8 @@ class MtPsaSwitchAPI(runtime_CLI.RuntimeAPI):
             print("Error: Invalid filename: " + filename)
             return
 
-        if 1 > user_id or user_id > 16:
-            print("Error: UserID must be between 1 and 16")
+        if 1 > user_id or user_id > 4:
+            print("Error: UserID must be between 1 and 4")
             return
 
         print("Loading json config")

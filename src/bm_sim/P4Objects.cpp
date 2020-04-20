@@ -2182,8 +2182,7 @@ P4Objects::init_objects(std::istream *is,
 
     init_actions(cfg_root);
 
-    ageing_monitor = AgeingMonitorIface::make(
-        device_id, cxt_id, notifications_transport);
+    ageing_monitor = AgeingMonitorIface::make(device_id, cxt_id, notifications_transport);
 
     init_pipelines(cfg_root, lookup_factory, &init_state);
 

@@ -50,7 +50,7 @@ namespace mtpsa {
 packet_id_t MtPsaSwitch::packet_id = 0;
 
 MtPsaSwitch::MtPsaSwitch(bool enable_swap)
-  : Switch(enable_swap),
+  : Switch(enable_swap, nb_user_threads+1),
     input_buffer(1024),
     egress_buffers(nb_user_threads, 64, EgressThreadMapper(nb_user_threads)),
     output_buffer(128),
@@ -62,7 +62,9 @@ MtPsaSwitch::MtPsaSwitch(bool enable_swap)
     pre(new McSimplePreLAG()),
     start(clock::now())
 {
-  add_component<McSimplePreLAG>(pre);
+  for (int i=0; i<=nb_user_threads; i++) {
+      add_cxt_component<McSimplePreLAG>(i, pre);
+  }
 
   add_required_field("mtpsa_ingress_parser_input_metadata", "ingress_port");
   add_required_field("mtpsa_ingress_parser_input_metadata", "packet_path");
@@ -186,7 +188,7 @@ MtPsaSwitch::set_all_egress_queue_rates(const uint64_t rate_pps) {
 int
 MtPsaSwitch::load_user_config(size_t user_id, const std::string &new_config) {
   if (new_config.length() > 0 && user_id > 0)
-    return 0;
+    return SwitchWContexts::load_user_config(new_config, user_id);
   return -1;
 }
 
@@ -236,9 +238,9 @@ MtPsaSwitch::get_ts() const {
 }
 
 void
-MtPsaSwitch::enqueue(port_t egress_port, std::unique_ptr<Packet> &&packet) {
+MtPsaSwitch::enqueue(int user_id, port_t egress_port, std::unique_ptr<Packet> &&packet) {
   packet->set_egress_port(egress_port);
-  egress_buffers.push_front(egress_port, std::move(packet));
+  egress_buffers.push_front(user_id, std::move(packet));
 }
 
 void
@@ -299,6 +301,10 @@ MtPsaSwitch::ingress_thread() {
     Deparser *deparser = this->get_deparser("ingress_deparser");
     deparser->deparse(packet.get());
 
+    const auto &f_user_id = phv->get_field("mtpsa_ingress_output_metadata.user_id");
+    int user_id = f_user_id.get_uint();
+    BMLOG_DEBUG_PKT(*packet, "User ID is {}", user_id);
+
     // handling multicast
     unsigned int mgid = 0u;
     const auto &f_mgid = phv->get_field("mtpsa_ingress_output_metadata.multicast_group");
@@ -315,7 +321,7 @@ MtPsaSwitch::ingress_thread() {
         BMLOG_DEBUG_PKT(*packet, "Replicating packet on port {}", egress_port);
         std::unique_ptr<Packet> packet_copy = packet->clone_with_phv_ptr();
         packet_copy->set_register(PACKET_LENGTH_REG_IDX, packet_size);
-        enqueue(egress_port, std::move(packet_copy));
+        enqueue(user_id, egress_port, std::move(packet_copy));
       }
       continue;
     }
@@ -324,7 +330,7 @@ MtPsaSwitch::ingress_thread() {
     port_t egress_port = f_egress_port.get_uint();
     BMLOG_DEBUG_PKT(*packet, "Egress port is {}", egress_port);
 
-    enqueue(egress_port, std::move(packet));
+    enqueue(user_id, egress_port, std::move(packet));
   }
 }
 
@@ -344,7 +350,7 @@ void MtPsaSwitch::user_thread(size_t user_id) {
     phv->reset();
     phv->get_field("mtpsa_egress_parser_input_metadata.egress_port").set(port);
 
-    Parser *parser = this->get_parser("parser");
+    Parser *parser = this->get_user_parser(user_id, "parser");
     parser->parse(packet.get());
 
     phv->get_field("mtpsa_input_metadata.port").set(phv->get_field("mtpsa_parser_input_metadata.port"));
@@ -352,11 +358,11 @@ void MtPsaSwitch::user_thread(size_t user_id) {
     phv->get_field("mtpsa_input_metadata.parser_error").set(packet->get_error_code().get());
     phv->get_field("mtpsa_output_metadata.drop").set(0);
 
-    Pipeline *pipeline = this->get_pipeline("pipeline");
+    Pipeline *pipeline = this->get_user_pipeline(user_id, "pipeline");
     pipeline->apply(packet.get());
     packet->reset_exit();
 
-    Deparser *deparser = this->get_deparser("deparser");
+    Deparser *deparser = this->get_user_deparser(user_id, "deparser");
     deparser->deparse(packet.get());
 
     output_buffer.push_front(std::move(packet));

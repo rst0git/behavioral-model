@@ -804,6 +804,9 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   load_new_config(const std::string &new_config) override;
 
   RuntimeInterface::ErrorCode
+  load_user_config(const std::string &new_config, size_t user_id);
+
+  RuntimeInterface::ErrorCode
   swap_configs() override;
 
   std::string get_config() const override;
@@ -939,7 +942,11 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   mutable boost::shared_mutex process_packet_mutex{};
 
   std::string current_config{"{}"};  // empty JSON config
+  std::string current_user_config[5]{"{}", "{}", "{}", "{}", "{}"};
+
   bool config_loaded{false};
+  bool user_config_loaded[5]{false};
+
   mutable std::condition_variable config_loaded_cv{};
   mutable std::mutex config_mutex{};
 
@@ -953,7 +960,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
 class Switch : public SwitchWContexts {
  public:
   //! See SwitchWContexts::SwitchWContexts()
-  explicit Switch(bool enable_swap = false);
+  explicit Switch(bool enable_swap = false, size_t nb_user_threads = 1u);
 
   // to avoid C++ name hiding
   using SwitchWContexts::field_exists;
@@ -1058,6 +1065,11 @@ class Switch : public SwitchWContexts {
   template<typename T>
   bool add_component(std::shared_ptr<T> ptr) {
     return add_cxt_component<T>(0, std::move(ptr));
+  }
+
+  template<typename T>
+  bool add_component(std::shared_ptr<T> ptr, size_t user_id) {
+    return add_cxt_component<T>(user_id, std::move(ptr));
   }
 
   //! Retrieve the shared pointer to an object of type `T` previously added to

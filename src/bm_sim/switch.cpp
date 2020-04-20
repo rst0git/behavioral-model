@@ -191,7 +191,8 @@ SwitchWContexts::init_objects(const std::string &json_path, device_id_t dev_id,
   }
 
   int status = init_objects(&fs, dev_id, transport);
-  if (status != 0) return status;
+  if (status != 0)
+    return status;
 
   {
     std::unique_lock<std::mutex> config_lock(config_mutex);
@@ -234,8 +235,7 @@ SwitchWContexts::init_from_options_parser(
   if (transport == nullptr) {
 #ifdef BM_NANOMSG_ON
     notifications_addr = parser.notifications_addr;
-    transport = std::shared_ptr<TransportIface>(
-        TransportIface::make_nanomsg(notifications_addr));
+    transport = std::shared_ptr<TransportIface>(TransportIface::make_nanomsg(notifications_addr));
 #else
     notifications_addr = "";
     transport = std::shared_ptr<TransportIface>(TransportIface::make_dummy());
@@ -322,7 +322,8 @@ SwitchWContexts::init_from_options_parser(
 
   if (parser.state_file_path != "") {
     status = deserialize_from_file(parser.state_file_path);
-    if (status != 0) return status;
+    if (status != 0)
+      return status;
   }
 
   dump_packet_data = parser.dump_packet_data;
@@ -361,6 +362,30 @@ SwitchWContexts::load_new_config(const std::string &new_config) {
   {
     std::unique_lock<std::mutex> config_lock(config_mutex);
     current_config = new_config;
+  }
+  return ErrorCode::SUCCESS;
+}
+
+RuntimeInterface::ErrorCode
+SwitchWContexts::load_user_config(const std::string &new_config, size_t user_id) {
+  fprintf(stderr, "Open -> %s\n", new_config.c_str());
+  std::ifstream fs(new_config, std::ios::in);
+  if (!fs) {
+    fprintf(stderr, "JSON input file %s cannot be opened\n", new_config.c_str());
+    return ErrorCode::NO_ONGOING_SWAP;
+  }
+
+  ErrorCode rc = contexts.at(user_id).load_user_config(&fs, get_lookup_factory(), required_fields, arith_objects);
+  if (rc != ErrorCode::SUCCESS)
+    return rc;
+
+  {
+    std::unique_lock<std::mutex> config_lock(config_mutex);
+    current_user_config[user_id] = std::string(
+        (std::istreambuf_iterator<char>(fs)),
+        std::istreambuf_iterator<char>()
+    );
+    user_config_loaded[user_id] = true;
   }
   return ErrorCode::SUCCESS;
 }
@@ -576,8 +601,7 @@ SwitchWContexts::transport_send_probe(uint64_t x) const {
 }
 
 // Switch convenience class
-
-Switch::Switch(bool enable_swap) : SwitchWContexts(1u, enable_swap) { }
+Switch::Switch(bool enable_swap, size_t nb_user_threads) : SwitchWContexts(nb_user_threads, enable_swap) { }
 
 std::unique_ptr<Packet>
 Switch::new_packet_ptr(port_t ingress_port,

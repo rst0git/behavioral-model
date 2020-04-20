@@ -73,6 +73,18 @@ class MtPsaSwitch : public Switch {
     return (packet_id-1);
   }
 
+  Pipeline *get_user_pipeline(size_t user_id, const std::string &name) {
+    return get_context(user_id)->get_pipeline(name);
+  }
+
+  Parser *get_user_parser(size_t user_id, const std::string &name) {
+    return get_context(user_id)->get_parser(name);
+  }
+
+  Deparser *get_user_deparser(size_t user_id, const std::string &name) {
+    return get_context(user_id)->get_deparser(name);
+  }
+
   void set_transmit_fn(TransmitFn fn);
 
   // overriden interfaces
@@ -167,7 +179,7 @@ class MtPsaSwitch : public Switch {
 
   ts_res get_ts() const;
 
-  void enqueue(port_t egress_port, std::unique_ptr<Packet> &&packet);
+  void enqueue(int user_id, port_t egress_port, std::unique_ptr<Packet> &&packet);
 
   void check_queueing_metadata();
 

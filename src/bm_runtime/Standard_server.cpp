@@ -905,8 +905,7 @@ public:
 
   void bm_load_new_config(const std::string& config_str) {
     Logger::get()->trace("bm_load_new_config");
-    RuntimeInterface::ErrorCode error_code =
-      switch_->load_new_config(config_str);
+    RuntimeInterface::ErrorCode error_code = switch_->load_new_config(config_str);
     if(error_code != RuntimeInterface::ErrorCode::SUCCESS) {
       InvalidSwapOperation iso;
       iso.code = (SwapOperationErrorCode::type) error_code;
