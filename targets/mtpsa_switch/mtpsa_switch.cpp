@@ -139,7 +139,7 @@ void
 MtPsaSwitch::start_and_return_() {
   threads_.push_back(std::thread(&MtPsaSwitch::ingress_thread, this));
   for (size_t i = 0; i < nb_user_threads; i++) {
-    threads_.push_back(std::thread(&MtPsaSwitch::user_thread, this, i));
+    threads_.push_back(std::thread(&MtPsaSwitch::egress_thread, this, i));
   }
   threads_.push_back(std::thread(&MtPsaSwitch::transmit_thread, this));
 }
@@ -334,7 +334,7 @@ MtPsaSwitch::ingress_thread() {
   }
 }
 
-void MtPsaSwitch::user_thread(size_t user_id) {
+void MtPsaSwitch::egress_thread(size_t user_id) {
   PHV *phv;
 
   while (1) {

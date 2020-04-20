@@ -165,7 +165,7 @@ class MtPsaSwitch : public Switch {
 
  private:
   void ingress_thread();
-  void user_thread(size_t user_id);
+  void egress_thread(size_t user_id);
   void transmit_thread();
 
   bool get_mirroring_mapping(mirror_id_t mirror_id, port_t *port) const {
