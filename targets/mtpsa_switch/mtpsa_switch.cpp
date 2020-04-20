@@ -52,7 +52,7 @@ packet_id_t MtPsaSwitch::packet_id = 0;
 MtPsaSwitch::MtPsaSwitch(bool enable_swap)
   : Switch(enable_swap, nb_user_threads+1),
     input_buffer(1024),
-    egress_buffers(nb_user_threads, 64, EgressThreadMapper(nb_user_threads)),
+    egress_buffers(nb_user_threads+1, 64, EgressThreadMapper(nb_user_threads)),
     output_buffer(128),
     my_transmit_fn([this](port_t port_num, packet_id_t pkt_id, const char *buffer, int len)
     {
@@ -138,7 +138,7 @@ MtPsaSwitch::receive_(port_t port_num, const char *buffer, int len) {
 void
 MtPsaSwitch::start_and_return_() {
   threads_.push_back(std::thread(&MtPsaSwitch::ingress_thread, this));
-  for (size_t i = 0; i < nb_user_threads; i++) {
+  for (size_t i = 0; i <= nb_user_threads; i++) {
     threads_.push_back(std::thread(&MtPsaSwitch::egress_thread, this, i));
   }
   threads_.push_back(std::thread(&MtPsaSwitch::transmit_thread, this));
