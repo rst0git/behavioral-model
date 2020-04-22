@@ -19,7 +19,6 @@ int main(int argc, char* argv[])
 {
   mtpsa_switch = new bm::mtpsa::MtPsaSwitch();
   mtpsa_switch_parser = new bm::TargetParserBasic();
-  mtpsa_switch_parser->add_flag_option("enable-swap", "enable JSON swapping at runtime");
   mtpsa_switch_parser->add_string_option("user01", "User 1 config file");
   mtpsa_switch_parser->add_string_option("user02", "User 2 config file");
   mtpsa_switch_parser->add_string_option("user03", "User 3 config file");
@@ -28,15 +27,6 @@ int main(int argc, char* argv[])
   int status = mtpsa_switch->init_from_command_line_options(argc, argv, mtpsa_switch_parser);
   if (status != 0)
     std::exit(status);
-
-  {
-    bool enable_swap_flag = false;
-    auto ret = mtpsa_switch_parser->get_flag_option("enable-swap", &enable_swap_flag);
-    if (ret != bm::TargetParserBasic::ReturnCode::SUCCESS)
-      std::exit(1);
-    if (enable_swap_flag)
-      mtpsa_switch->enable_config_swap();
-  }
 
   for (int i=1; i<=4; i++) {
     std::string user_config;

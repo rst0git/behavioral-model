@@ -49,8 +49,8 @@ namespace mtpsa {
 
 packet_id_t MtPsaSwitch::packet_id = 0;
 
-MtPsaSwitch::MtPsaSwitch(bool enable_swap)
-  : Switch(enable_swap, nb_user_threads+1),
+MtPsaSwitch::MtPsaSwitch()
+  : Switch(true, nb_user_threads+1),
     input_buffer(1024),
     egress_buffers(nb_user_threads+1, 64, EgressThreadMapper(nb_user_threads)),
     output_buffer(128),

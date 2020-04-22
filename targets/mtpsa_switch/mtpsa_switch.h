@@ -34,8 +34,8 @@ class MtPsaSwitch : public Switch {
   using clock = std::chrono::high_resolution_clock;
 
  public:
-  // by default, swapping is off
-  explicit MtPsaSwitch(bool enable_swap = false);
+
+  explicit MtPsaSwitch();
 
   ~MtPsaSwitch();
 
