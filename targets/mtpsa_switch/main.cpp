@@ -39,10 +39,8 @@ int main(int argc, char* argv[])
 
   int thrift_port = mtpsa_switch->get_runtime_port();
 
-  fprintf(stderr, ">> bm_runtime::start_server\n");
   bm_runtime::start_server(mtpsa_switch, thrift_port);
 
-  fprintf(stderr, ">> bm_runtime::add_service\n");
   bm_runtime::add_service<
     mtpswitch_runtime::MtPsaSwitchIf,
     mtpswitch_runtime::MtPsaSwitchProcessor
@@ -51,7 +49,6 @@ int main(int argc, char* argv[])
     mtpswitch_runtime::get_handler(mtpsa_switch)
   );
 
-  fprintf(stderr, ">> start_and_return\n");
   mtpsa_switch->start_and_return();
 
   while (true)
