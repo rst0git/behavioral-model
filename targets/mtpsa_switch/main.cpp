@@ -33,8 +33,8 @@ int main(int argc, char* argv[])
     auto ret = mtpsa_switch_parser->get_string_option("user0" + std::to_string(i), &user_config);
     if (ret != bm::TargetParserBasic::ReturnCode::SUCCESS)
       std::exit(1);
-    fprintf(stderr, "Loading %s\n", user_config.c_str());
-    mtpsa_switch->load_user_config(i, user_config);
+    if (user_config.length() > 0)
+      mtpsa_switch->load_user_config(i, user_config);
   }
 
   int thrift_port = mtpsa_switch->get_runtime_port();
