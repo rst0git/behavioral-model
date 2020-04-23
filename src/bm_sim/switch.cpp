@@ -151,7 +151,8 @@ SwitchWContexts::set_group_selector(
 }
 
 int
-SwitchWContexts::init_objects(std::istream *is, device_id_t dev_id,
+SwitchWContexts::init_objects(std::istream *is,
+                              device_id_t dev_id,
                               std::shared_ptr<TransportIface> transport) {
   int status = 0;
 
@@ -182,8 +183,10 @@ SwitchWContexts::init_objects(std::istream *is, device_id_t dev_id,
 }
 
 int
-SwitchWContexts::init_objects(const std::string &json_path, device_id_t dev_id,
-                              std::shared_ptr<TransportIface> transport) {
+SwitchWContexts::init_objects(const std::string &json_path,
+                              device_id_t dev_id,
+                              std::shared_ptr<TransportIface> transport)
+{
   std::ifstream fs(json_path, std::ios::in);
   if (!fs) {
     std::cout << "JSON input file " << json_path << " cannot be opened\n";
