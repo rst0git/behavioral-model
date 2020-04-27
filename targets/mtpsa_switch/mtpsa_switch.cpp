@@ -360,21 +360,22 @@ void MtPsaSwitch::egress_thread(size_t user_id) {
     // User parser
     parser = this->get_user_parser(user_id, "parser");
     if (!parser) {
-      throw std::runtime_error("Can't load user parser");
-    }
-    parser->parse(packet.get());
+      BMLOG_DEBUG_PKT(*packet, "Can't load user ({}) parser", user_id);
+    } else {
+      parser->parse(packet.get());
 
-    phv->get_field("mtpsa_input_metadata.port").set(phv->get_field("mtpsa_parser_input_metadata.port"));
-    phv->get_field("mtpsa_input_metadata.timestamp").set(get_ts().count());
-    phv->get_field("mtpsa_input_metadata.parser_error").set(packet->get_error_code().get());
-    phv->get_field("mtpsa_output_metadata.drop").set(0);
+      phv->get_field("mtpsa_input_metadata.port").set(phv->get_field("mtpsa_parser_input_metadata.port"));
+      phv->get_field("mtpsa_input_metadata.timestamp").set(get_ts().count());
+      phv->get_field("mtpsa_input_metadata.parser_error").set(packet->get_error_code().get());
+      phv->get_field("mtpsa_output_metadata.drop").set(0);
 
-    Pipeline *pipeline = this->get_user_pipeline(user_id, "pipeline");
-    if (!pipeline) {
-      throw std::runtime_error("Can't load user pipeline");
+      Pipeline *pipeline = this->get_user_pipeline(user_id, "pipeline");
+      if (!pipeline) {
+        throw std::runtime_error("Can't load user pipeline");
+      }
+      pipeline->apply(packet.get());
+      packet->reset_exit();
     }
-    pipeline->apply(packet.get());
-    packet->reset_exit();
 
     // Admin egress deparser
     Deparser *deparser = this->get_deparser("egress_deparser");
@@ -386,9 +387,10 @@ void MtPsaSwitch::egress_thread(size_t user_id) {
     // User deparser
     deparser = this->get_user_deparser(user_id, "deparser");
     if (!deparser) {
-      throw std::runtime_error("Can't load user deparser");
+      BMLOG_DEBUG_PKT(*packet, "Can't load user ({}) deparser", user_id);
+    } else {
+      deparser->deparse(packet.get());
     }
-    deparser->deparse(packet.get());
 
     output_buffer.push_front(std::move(packet));
   }
