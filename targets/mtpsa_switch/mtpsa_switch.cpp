@@ -2,11 +2,10 @@
 #include <bm/bm_sim/tables.h>
 #include <bm/bm_sim/logger.h>
 
-#include <unistd.h>
-
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <unistd.h>
 
 #include "mtpsa_switch.h"
 
@@ -267,8 +266,7 @@ MtPsaSwitch::ingress_thread() {
     phv->get_field("mtpsa_ingress_input_metadata.ingress_port").set(ingress_port);
     phv->get_field("mtpsa_ingress_input_metadata.packet_path")
       .set(phv->get_field("mtpsa_ingress_parser_input_metadata.packet_path"));
-    phv->get_field("mtpsa_ingress_input_metadata.parser_error")
-      .set(packet->get_error_code().get());
+    phv->get_field("mtpsa_ingress_input_metadata.parser_error").set(packet->get_error_code().get());
 
     phv->get_field("mtpsa_ingress_output_metadata.class_of_service").set(0);
     phv->get_field("mtpsa_ingress_output_metadata.clone").set(0);
