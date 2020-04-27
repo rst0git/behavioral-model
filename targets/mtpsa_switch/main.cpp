@@ -8,11 +8,11 @@
 
 namespace {
   bm::mtpsa::MtPsaSwitch *mtpsa_switch;
-}  // namespace
+}
 
 namespace mtpswitch_runtime {
   shared_ptr<MtPsaSwitchIf> get_handler(bm::mtpsa::MtPsaSwitch *sw);
-}  // namespace mtpswitch_runtime
+}
 
 int main(int argc, char* argv[])
 {
