@@ -86,14 +86,6 @@ MtPsaSwitch::MtPsaSwitch()
   add_required_field("mtpsa_egress_parser_input_metadata", "egress_port");
   add_required_field("mtpsa_egress_parser_input_metadata", "packet_path");
 
-  // Fixme: These are used by the user's pipeline
-  // add_required_field("mtpsa_egress_input_metadata", "class_of_service");
-  // add_required_field("mtpsa_egress_input_metadata", "egress_port");
-  // add_required_field("mtpsa_egress_input_metadata", "packet_path");
-  // add_required_field("mtpsa_egress_input_metadata", "instance");
-  // add_required_field("mtpsa_egress_input_metadata", "egress_timestamp");
-  // add_required_field("mtpsa_egress_input_metadata", "parser_error");
-
   add_required_field("mtpsa_egress_output_metadata", "clone");
   add_required_field("mtpsa_egress_output_metadata", "clone_session_id");
   add_required_field("mtpsa_egress_output_metadata", "drop");
@@ -104,9 +96,24 @@ MtPsaSwitch::MtPsaSwitch()
   force_arith_header("mtpsa_ingress_input_metadata");
   force_arith_header("mtpsa_ingress_output_metadata");
   force_arith_header("mtpsa_egress_parser_input_metadata");
-  // force_arith_header("mtpsa_egress_input_metadata"); // Fixme: Used by user
   force_arith_header("mtpsa_egress_output_metadata");
   force_arith_header("mtpsa_egress_deparser_input_metadata");
+
+  // Required user fields
+  add_required_user_field("mtpsa_parser_input_metadata", "port");
+  add_required_user_field("mtpsa_parser_input_metadata", "packet_path");
+  
+  add_required_user_field("mtpsa_input_metadata", "port");
+  add_required_user_field("mtpsa_input_metadata", "packet_path");
+  add_required_user_field("mtpsa_input_metadata", "timestamp");
+  add_required_user_field("mtpsa_input_metadata", "parser_error");
+
+  add_required_user_field("mtpsa_output_metadata", "class_of_service");
+  add_required_user_field("mtpsa_output_metadata", "clone");
+  add_required_user_field("mtpsa_output_metadata", "clone_session_id");
+  add_required_user_field("mtpsa_output_metadata", "drop");
+  add_required_user_field("mtpsa_output_metadata", "multicast_group");
+  add_required_user_field("mtpsa_output_metadata", "port");
 
   import_primitives();
   import_counters();

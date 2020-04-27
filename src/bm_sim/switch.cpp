@@ -132,6 +132,12 @@ SwitchWContexts::add_required_field(const std::string &header_name,
 }
 
 void
+SwitchWContexts::add_required_user_field(const std::string &header_name,
+                                         const std::string &field_name) {
+  required_user_fields.insert(std::make_pair(header_name, field_name));
+}
+
+void
 SwitchWContexts::force_arith_field(const std::string &header_name,
                                    const std::string &field_name) {
   arith_objects.add_field(header_name, field_name);
@@ -170,8 +176,7 @@ SwitchWContexts::init_objects(std::istream *is,
     cxt.set_device_id(device_id);
     cxt.set_notifications_transport(notifications_transport);
     if (is != nullptr) {
-      status = cxt.init_objects(is, get_lookup_factory(),
-                                required_fields, arith_objects);
+      status = cxt.init_objects(is, get_lookup_factory(), required_fields, arith_objects);
       is->clear();
       is->seekg(0, std::ios::beg);
       if (status != 0) return status;
@@ -381,7 +386,7 @@ SwitchWContexts::load_user_config(const std::string &new_config, size_t user_id)
     return ErrorCode::NO_ONGOING_SWAP;
   }
 
-  ErrorCode rc = contexts.at(user_id).load_user_config(&fs, get_lookup_factory(), required_fields, arith_objects);
+  ErrorCode rc = contexts.at(user_id).load_user_config(&fs, get_lookup_factory(), required_user_fields, arith_objects);
   if (rc != ErrorCode::SUCCESS)
     return rc;
 

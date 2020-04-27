@@ -156,6 +156,9 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   void add_required_field(const std::string &header_name,
                           const std::string &field_name);
 
+  void add_required_user_field(const std::string &header_name,
+                               const std::string &field_name);
+
   //! Checks that the given field exists for context \p cxt_id, i.e. checks that
   //! the field was defined in the input JSON used to configure that context.
   bool field_exists(cxt_id_t cxt_id, const std::string &header_name,
@@ -837,6 +840,10 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
     return required_fields;
   }
 
+  const std::set<header_field_pair> &get_required_user_fields() const {
+    return required_user_fields;
+  }
+
   //! Add a component to this switch. Each switch maintains a map `T` ->
   //! `shared_ptr<T>`, which maps a type (using `typeid`) to a shared pointer to
   //! an object of the same type. The pointer can be retrieved at a later time
@@ -928,6 +935,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   std::unordered_map<std::type_index, std::shared_ptr<void> > components{};
 
   std::set<header_field_pair> required_fields{};
+  std::set<header_field_pair> required_user_fields{};
   ForceArith arith_objects{};
 
   int thrift_port{};
