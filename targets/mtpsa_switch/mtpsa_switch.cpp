@@ -308,7 +308,7 @@ MtPsaSwitch::ingress_thread() {
 
     const auto &f_user_id = phv->get_field("mtpsa_ingress_output_metadata.user_id");
     int user_id = f_user_id.get_uint();
-    BMLOG_DEBUG_PKT(*packet, "User ID is {}", user_id);
+    BMLOG_DEBUG_PKT(*packet, "User ID: {}", user_id);
 
     // handling multicast
     unsigned int mgid = 0u;
@@ -333,7 +333,7 @@ MtPsaSwitch::ingress_thread() {
 
     const auto &f_egress_port = phv->get_field("mtpsa_ingress_output_metadata.egress_port");
     port_t egress_port = f_egress_port.get_uint();
-    BMLOG_DEBUG_PKT(*packet, "Egress port is {}", egress_port);
+    BMLOG_DEBUG_PKT(*packet, "Egress port: {}", egress_port);
 
     enqueue(user_id, egress_port, std::move(packet));
   }
