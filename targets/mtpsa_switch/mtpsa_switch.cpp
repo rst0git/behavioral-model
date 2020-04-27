@@ -352,10 +352,16 @@ void MtPsaSwitch::egress_thread(size_t user_id) {
 
     // Admin egress parser
     Parser *parser = this->get_parser("egress_parser");
+    if (!parser) {
+      throw std::runtime_error("Can't load admin egress parser");
+    }
     parser->parse(packet.get());
 
     // User parser
     parser = this->get_user_parser(user_id, "parser");
+    if (!parser) {
+      throw std::runtime_error("Can't load user parser");
+    }
     parser->parse(packet.get());
 
     phv->get_field("mtpsa_input_metadata.port").set(phv->get_field("mtpsa_parser_input_metadata.port"));
@@ -364,15 +370,24 @@ void MtPsaSwitch::egress_thread(size_t user_id) {
     phv->get_field("mtpsa_output_metadata.drop").set(0);
 
     Pipeline *pipeline = this->get_user_pipeline(user_id, "pipeline");
+    if (!pipeline) {
+      throw std::runtime_error("Can't load user pipeline");
+    }
     pipeline->apply(packet.get());
     packet->reset_exit();
 
     // Admin egress deparser
     Deparser *deparser = this->get_deparser("egress_deparser");
+    if (!deparser) {
+      throw std::runtime_error("Can't load admin egress deparser");
+    }
     deparser->deparse(packet.get());
 
     // User deparser
     deparser = this->get_user_deparser(user_id, "deparser");
+    if (!deparser) {
+      throw std::runtime_error("Can't load user deparser");
+    }
     deparser->deparse(packet.get());
 
     output_buffer.push_front(std::move(packet));
