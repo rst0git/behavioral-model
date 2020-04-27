@@ -344,6 +344,8 @@ void MtPsaSwitch::egress_thread(size_t user_id) {
     if (packet == nullptr)
       break;
 
+    BMLOG_DEBUG_PKT(*packet, "User ({}) processing packet", user_id);
+
     phv = packet->get_phv();
     phv->reset();
     phv->get_field("mtpsa_egress_parser_input_metadata.egress_port").set(port);
