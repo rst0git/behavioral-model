@@ -71,12 +71,9 @@ class MtPsaSwitchAPI(runtime_CLI.RuntimeAPI):
             return
 
         print("Loading json config")
-        with open(filename, 'r') as f:
-            json_str = f.read()
-            json.loads(json_str)
-            if self.pswitch_client.load_user_config(user_id, json_str):
-                print("Error: Failed to load user config")
-                return
+        if self.pswitch_client.load_user_config(user_id, filename):
+            print("Error: Failed to load user config")
+            return
 
 def main():
     args = runtime_CLI.get_parser().parse_args()
