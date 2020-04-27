@@ -355,13 +355,16 @@ SwitchWContexts::load_new_config(const std::string &new_config) {
     return ErrorCode::CONFIG_SWAP_DISABLED;
 
   std::istringstream ss(new_config);
-  for (auto &cxt : contexts) {
-    ErrorCode rc = cxt.load_new_config(&ss, get_lookup_factory(), required_fields, arith_objects);
-    if (rc != ErrorCode::SUCCESS)
-      return rc;
-    ss.clear();
-    ss.seekg(0, std::ios::beg);
-  }
+
+  // Assume that SimpleSwitch, PSA, etc. always use a single context,
+  // and MTPSA reserves the first context for administration.
+  auto &cxt = contexts.front();
+  ErrorCode rc = cxt.load_new_config(&ss, get_lookup_factory(), required_fields, arith_objects);
+  if (rc != ErrorCode::SUCCESS)
+    return rc;
+  ss.clear();
+  ss.seekg(0, std::ios::beg);
+
   {
     std::unique_lock<std::mutex> config_lock(config_mutex);
     current_config = new_config;
