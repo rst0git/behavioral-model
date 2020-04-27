@@ -350,7 +350,12 @@ void MtPsaSwitch::egress_thread(size_t user_id) {
     phv->reset();
     phv->get_field("mtpsa_egress_parser_input_metadata.egress_port").set(port);
 
-    Parser *parser = this->get_user_parser(user_id, "parser");
+    // Admin egress parser
+    Parser *parser = this->get_parser("egress_parser");
+    parser->parse(packet.get());
+
+    // User parser
+    parser = this->get_user_parser(user_id, "parser");
     parser->parse(packet.get());
 
     phv->get_field("mtpsa_input_metadata.port").set(phv->get_field("mtpsa_parser_input_metadata.port"));
@@ -362,7 +367,12 @@ void MtPsaSwitch::egress_thread(size_t user_id) {
     pipeline->apply(packet.get());
     packet->reset_exit();
 
-    Deparser *deparser = this->get_user_deparser(user_id, "deparser");
+    // Admin egress deparser
+    Deparser *deparser = this->get_deparser("egress_deparser");
+    deparser->deparse(packet.get());
+
+    // User deparser
+    deparser = this->get_user_deparser(user_id, "deparser");
     deparser->deparse(packet.get());
 
     output_buffer.push_front(std::move(packet));
