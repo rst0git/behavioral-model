@@ -61,7 +61,7 @@ MtPsaSwitch::MtPsaSwitch()
     pre(new McSimplePreLAG()),
     start(clock::now())
 {
-  for (int i=0; i<=nb_user_threads; i++) {
+  for (size_t i=0; i<=nb_user_threads; i++) {
       add_cxt_component<McSimplePreLAG>(i, pre);
   }
 
