@@ -472,7 +472,7 @@ class Context final {
   ErrorCode load_user_config(
       std::istream *is,
       LookupStructureFactory * lookup_factory,
-      const std::set<header_field_pair> &required_fields = std::set<header_field_pair>(),
+      const std::set<header_field_pair> &required_user_fields = std::set<header_field_pair>(),
       const ForceArith &arith_objects = ForceArith());
 
   ErrorCode swap_configs();

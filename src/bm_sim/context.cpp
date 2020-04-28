@@ -806,7 +806,7 @@ Context::ErrorCode
 Context::load_user_config(
     std::istream *is,
     LookupStructureFactory *lookup_factory,
-    const std::set<header_field_pair> &required_fields,
+    const std::set<header_field_pair> &required_user_fields,
     const ForceArith &arith_objects) {
   boost::unique_lock<boost::shared_mutex> lock(request_mutex);
 
@@ -815,7 +815,7 @@ Context::load_user_config(
     return ErrorCode::ONGOING_SWAP;
 
   p4objects_rt = std::make_shared<P4Objects>(std::cout, true);
-  init_objects(is, lookup_factory, required_fields, arith_objects);
+  init_objects(is, lookup_factory, required_user_fields, arith_objects);
   send_swap_status_notification(SwapStatus::NEW_CONFIG_LOADED);
 
   return ErrorCode::SUCCESS;
