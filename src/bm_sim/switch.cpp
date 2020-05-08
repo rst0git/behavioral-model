@@ -159,9 +159,9 @@ SwitchWContexts::set_group_selector(
 int
 SwitchWContexts::init_objects(std::istream *is,
                               device_id_t dev_id,
-                              std::shared_ptr<TransportIface> transport) {
-  int status = 0;
-
+                              std::shared_ptr<TransportIface> transport,
+                              size_t ctx_id)
+{
   device_id = dev_id;
 
   if (!transport) {
@@ -171,18 +171,24 @@ SwitchWContexts::init_objects(std::istream *is,
     notifications_transport = std::move(transport);
   }
 
-  for (cxt_id_t cxt_id = 0; cxt_id < nb_cxts; cxt_id++) {
-    auto &cxt = contexts.at(cxt_id);
-    cxt.set_device_id(device_id);
-    cxt.set_notifications_transport(notifications_transport);
-    if (is != nullptr) {
+  auto &cxt = contexts.at(ctx_id);
+  cxt.set_device_id(device_id);
+  cxt.set_notifications_transport(notifications_transport);
+
+  if (is != nullptr) {
+    int status;
+
+    if (ctx_id == 0)
       status = cxt.init_objects(is, get_lookup_factory(), required_fields, arith_objects);
-      is->clear();
-      is->seekg(0, std::ios::beg);
-      if (status != 0) return status;
-    }
-    phv_source->set_phv_factory(cxt_id, &cxt.get_phv_factory());
+    else
+      status = cxt.init_objects(is, get_lookup_factory(), required_user_fields, arith_objects);
+
+    is->clear();
+    is->seekg(0, std::ios::beg);
+    if (status != 0)
+      return status;
   }
+  phv_source->set_phv_factory(ctx_id, &cxt.get_phv_factory());
 
   return 0;
 }
@@ -190,23 +196,29 @@ SwitchWContexts::init_objects(std::istream *is,
 int
 SwitchWContexts::init_objects(const std::string &json_path,
                               device_id_t dev_id,
-                              std::shared_ptr<TransportIface> transport)
-{
+                              std::shared_ptr<TransportIface> transport,
+                              size_t ctx_id) {
   std::ifstream fs(json_path, std::ios::in);
   if (!fs) {
     std::cout << "JSON input file " << json_path << " cannot be opened\n";
     return 1;
   }
 
-  int status = init_objects(&fs, dev_id, transport);
+  int status = init_objects(&fs, dev_id, transport, ctx_id);
   if (status != 0)
     return status;
 
-  {
+  // SimpleSwitch and PSA use only one context (cxt_id=0).
+  // For MTPSA, on cxt_id=0 is loaded the superuser config,
+  // all other context IDs represent a user configuration.
+  if (ctx_id == 0) {
     std::unique_lock<std::mutex> config_lock(config_mutex);
-    current_config = std::string((std::istreambuf_iterator<char>(fs)),
-                                 std::istreambuf_iterator<char>());
+    current_config = std::string((std::istreambuf_iterator<char>(fs)), std::istreambuf_iterator<char>());
     config_loaded = true;
+  } else {
+    std::unique_lock<std::mutex> config_lock(config_mutex);
+    current_user_config[ctx_id] = std::string((std::istreambuf_iterator<char>(fs)), std::istreambuf_iterator<char>());
+    user_config_loaded[ctx_id] = true;
   }
 
   return 0;
@@ -278,6 +290,19 @@ SwitchWContexts::init_from_options_parser(
 
   if (status != 0)
     return status;
+
+  // SimpleSwitch and PSA use only one context (cxt_id=0).
+  // For MTPSA, on cxt_id=0 is loaded the superuser config,
+  // all other context IDs represent a user configuration.
+
+  for (const auto &usr : parser.users) {
+    auto user_id = usr.first;
+    auto config_path = usr.second;
+    std::cout << "Loading user " << user_id << " config from " << config_path << std::endl;
+    status = init_objects(config_path, parser.device_id, transport, user_id);
+    if (status != 0)
+      return status;
+  }
 
   if (my_dev_mgr != nullptr)
     set_dev_mgr(std::move(my_dev_mgr));
@@ -379,14 +404,19 @@ SwitchWContexts::load_new_config(const std::string &new_config) {
 
 RuntimeInterface::ErrorCode
 SwitchWContexts::load_user_config(const std::string &new_config, size_t user_id) {
-  fprintf(stderr, "Open -> %s\n", new_config.c_str());
+  std::cout << "Open user " << user_id << " config from " << new_config.c_str() << std::endl;
   std::ifstream fs(new_config, std::ios::in);
   if (!fs) {
     fprintf(stderr, "JSON input file %s cannot be opened\n", new_config.c_str());
     return ErrorCode::NO_ONGOING_SWAP;
   }
 
-  ErrorCode rc = contexts.at(user_id).load_user_config(&fs, get_lookup_factory(), required_user_fields, arith_objects);
+  ErrorCode rc = contexts.at(user_id).load_user_config(
+    &fs,
+    get_lookup_factory(),
+    required_user_fields,
+    arith_objects
+  );
   if (rc != ErrorCode::SUCCESS)
     return rc;
 

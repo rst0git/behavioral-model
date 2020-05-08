@@ -198,7 +198,8 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   size_t get_nb_cxts() { return nb_cxts; }
 
   int init_objects(const std::string &json_path, device_id_t device_id = 0,
-                   std::shared_ptr<TransportIface> notif_transport = nullptr);
+                   std::shared_ptr<TransportIface> notif_transport = nullptr,
+                   size_t ctx_id = 0);
 
   int init_objects_empty(device_id_t dev_id,
                          std::shared_ptr<TransportIface> transport);
@@ -880,7 +881,8 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
 
  private:
   int init_objects(std::istream *is, device_id_t dev_id,
-                   std::shared_ptr<TransportIface> transport);
+                   std::shared_ptr<TransportIface> transport,
+                   size_t ctx_id=0);
 
   void reset_target_state();
 

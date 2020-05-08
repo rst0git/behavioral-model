@@ -341,6 +341,7 @@ MtPsaSwitch::ingress_thread() {
 
 void MtPsaSwitch::egress_thread(size_t user_id) {
   PHV *phv;
+  PHV *user_phv;
 
   while (1) {
     std::unique_ptr<Packet> packet;
@@ -350,8 +351,6 @@ void MtPsaSwitch::egress_thread(size_t user_id) {
 
     if (packet == nullptr)
       break;
-
-    BMLOG_DEBUG_PKT(*packet, "User ({}) processing packet", user_id);
 
     phv = packet->get_phv();
     phv->reset();
@@ -364,19 +363,26 @@ void MtPsaSwitch::egress_thread(size_t user_id) {
     }
     parser->parse(packet.get());
 
+    // Change to user context
+    BMLOG_DEBUG_PKT(*packet, "User ({}) processing packet", user_id);
+    packet->change_context(user_id);
+    user_phv = packet->get_phv();
+
     // User parser
     parser = this->get_user_parser(user_id, "parser");
     if (!parser) {
+      // No user program is loaded; continue processing
       BMLOG_DEBUG_PKT(*packet, "Can't load user ({}) parser", user_id);
     } else {
       parser->parse(packet.get());
 
-      phv->get_field("mtpsa_input_metadata.port").set(phv->get_field("mtpsa_parser_input_metadata.port"));
-      phv->get_field("mtpsa_input_metadata.timestamp").set(get_ts().count());
-      phv->get_field("mtpsa_input_metadata.parser_error").set(packet->get_error_code().get());
-      phv->get_field("mtpsa_output_metadata.drop").set(0);
+      user_phv->get_field("mtpsa_input_metadata.port").set(user_phv->get_field("mtpsa_parser_input_metadata.port"));
+      user_phv->get_field("mtpsa_input_metadata.parser_error").set(packet->get_error_code().get());
+      user_phv->get_field("mtpsa_input_metadata.timestamp").set(get_ts().count());
+      user_phv->get_field("mtpsa_output_metadata.drop").set(0);
 
-      Pipeline *pipeline = this->get_user_pipeline(user_id, "pipeline");
+      // Users have only ingress pipeline
+      Pipeline *pipeline = this->get_user_pipeline(user_id, "ingress");
       if (!pipeline) {
         throw std::runtime_error("Can't load user pipeline");
       }
