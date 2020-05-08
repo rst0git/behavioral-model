@@ -924,7 +924,6 @@ P4Objects::init_parsers(const Json::Value &cfg_root, InitState *init_state) {
       const string parse_state_name = cfg_parse_state["name"].asString();
       const p4object_id_t id = cfg_parse_state["id"].asInt();
       dup_id_checker_states.add(id);
-      // p4object_id_t parse_state_id = cfg_parse_state["id"].asInt();
       std::unique_ptr<ParseState> parse_state(
           new ParseState(parse_state_name, id));
 
