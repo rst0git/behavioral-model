@@ -739,13 +739,6 @@ class RuntimeAPI(cmd.Cmd):
         self.mc_client = mc_client
         self.pre_type = pre_type
 
-    def do_greet(self, line):
-        print("hello")
-
-    def do_EOF(self, line):
-        print()
-        return True
-
     def do_shell(self, line):
         """Run a shell command"""
         print(os.popen(line).read())
@@ -2116,7 +2109,7 @@ class RuntimeAPI(cmd.Cmd):
         args = line.split()
         self.exactly_n_args(args, 1)
         filename = args[0]
-        json_cfg = self.client.bm_get_config()
+        json_cfg = self.client.bm_get_config(0)
         with open(filename, 'w') as f:
             f.write(json_cfg)
 

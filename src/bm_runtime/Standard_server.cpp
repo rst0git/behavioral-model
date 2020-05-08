@@ -1177,9 +1177,9 @@ public:
     switch_->reset_state();
   }
 
-  void bm_get_config(std::string& _return) {
+  void bm_get_config(std::string& _return, const int32_t cxt_id) {
     Logger::get()->trace("bm_get_config");
-    _return.append(switch_->get_config());
+    _return.append(switch_->get_config(cxt_id));
   }
 
   void bm_get_config_md5(std::string& _return) {

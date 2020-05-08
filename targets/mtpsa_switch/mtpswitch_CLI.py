@@ -6,6 +6,7 @@ import sys
 import os
 import json
 
+import bmpy_utils
 from mtpswitch_runtime import MtPsaSwitch
 
 class MtPsaSwitchAPI(runtime_CLI.RuntimeAPI):
@@ -74,6 +75,13 @@ class MtPsaSwitchAPI(runtime_CLI.RuntimeAPI):
         if self.pswitch_client.load_user_config(user_id, filename):
             print("Error: Failed to load user config")
             return
+
+    def do_switch_context(self, line):
+        """Load config from context: switch_context <ContextID>"""
+        args = line.split()
+        self.exactly_n_args(args, 1)
+        runtime_CLI.load_json_str(bmpy_utils.get_json_config(standard_client=self.client, ctx_id=int(args[0])))
+        return
 
 def main():
     args = runtime_CLI.get_parser().parse_args()

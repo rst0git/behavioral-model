@@ -813,7 +813,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   RuntimeInterface::ErrorCode
   swap_configs() override;
 
-  std::string get_config() const override;
+  std::string get_config(cxt_id_t cxt_id=0) const override;
   std::string get_config_md5() const override;
 
   P4Objects::IdLookupErrorCode p4objects_id_from_name(

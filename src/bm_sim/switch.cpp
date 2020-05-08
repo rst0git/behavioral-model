@@ -211,12 +211,11 @@ SwitchWContexts::init_objects(const std::string &json_path,
   // SimpleSwitch and PSA use only one context (cxt_id=0).
   // For MTPSA, on cxt_id=0 is loaded the superuser config,
   // all other context IDs represent a user configuration.
+  std::unique_lock<std::mutex> config_lock(config_mutex);
   if (ctx_id == 0) {
-    std::unique_lock<std::mutex> config_lock(config_mutex);
     current_config = std::string((std::istreambuf_iterator<char>(fs)), std::istreambuf_iterator<char>());
     config_loaded = true;
   } else {
-    std::unique_lock<std::mutex> config_lock(config_mutex);
     current_user_config[ctx_id] = std::string((std::istreambuf_iterator<char>(fs)), std::istreambuf_iterator<char>());
     user_config_loaded[ctx_id] = true;
   }
@@ -559,9 +558,13 @@ SwitchWContexts::do_swap() {
 }
 
 std::string
-SwitchWContexts::get_config() const {
-  std::unique_lock<std::mutex> config_lock(config_mutex);
-  return current_config;
+SwitchWContexts::get_config(cxt_id_t cxt_id) const {
+  if (cxt_id == 0) {
+    std::unique_lock<std::mutex> config_lock(config_mutex);
+    return current_config;
+  } else {
+    return current_user_config[cxt_id];
+  }
 }
 
 std::string
