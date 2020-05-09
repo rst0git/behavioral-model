@@ -99,7 +99,7 @@ MtPsaSwitch::MtPsaSwitch()
   force_arith_header("mtpsa_egress_output_metadata");
   force_arith_header("mtpsa_egress_deparser_input_metadata");
 
-  // Required user fields
+  // User metadata fields
   add_required_user_field("mtpsa_parser_input_metadata", "port");
   add_required_user_field("mtpsa_parser_input_metadata", "packet_path");
   
@@ -114,6 +114,10 @@ MtPsaSwitch::MtPsaSwitch()
   add_required_user_field("mtpsa_output_metadata", "drop");
   add_required_user_field("mtpsa_output_metadata", "multicast_group");
   add_required_user_field("mtpsa_output_metadata", "port");
+
+  force_arith_header("mtpsa_parser_input_metadata");
+  force_arith_header("mtpsa_input_metadata");
+  force_arith_header("mtpsa_output_metadata");
 
   import_primitives();
   import_counters();
@@ -345,16 +349,21 @@ void MtPsaSwitch::egress_thread(size_t user_id) {
 
   while (1) {
     std::unique_ptr<Packet> packet;
-    size_t port;
+    size_t egress_port;
 
-    egress_buffers.pop_back(user_id, &port, &packet);
+    egress_buffers.pop_back(user_id, &egress_port, &packet);
 
     if (packet == nullptr)
       break;
 
     phv = packet->get_phv();
+
+    // this reset() marks all headers as invalid - this is important since MTPSA
+    // deparses packets after ingress processing - so no guarantees can be made
+    // about their existence or validity while entering egress processing
     phv->reset();
-    phv->get_field("mtpsa_egress_parser_input_metadata.egress_port").set(port);
+
+    phv->get_field("mtpsa_egress_parser_input_metadata.egress_port").set(egress_port);
 
     // Admin egress parser
     Parser *parser = this->get_parser("egress_parser");
@@ -388,6 +397,10 @@ void MtPsaSwitch::egress_thread(size_t user_id) {
       }
       pipeline->apply(packet.get());
       packet->reset_exit();
+
+      egress_port = user_phv->get_field("mtpsa_output_metadata.port").get_uint();
+      BMLOG_DEBUG_PKT(*packet, "User {} sending on egress port: {}", user_id, egress_port);
+      packet->set_egress_port(egress_port);
     }
 
     // Admin egress deparser
