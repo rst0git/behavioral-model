@@ -840,6 +840,7 @@ class RuntimeAPI(cmd.Cmd):
         self.client = standard_client
         self.mc_client = mc_client
         self.pre_type = pre_type
+        self.ctx_id = 0
 
     def do_greet(self, line):
         print("hello")
@@ -1009,7 +1010,7 @@ class RuntimeAPI(cmd.Cmd):
 
         self.print_set_default(table_name, action_name, runtime_data)
 
-        self.client.bm_mt_set_default_action(0, table.name, action.name, runtime_data)
+        self.client.bm_mt_set_default_action(self.ctx_id, table.name, action.name, runtime_data)
 
     def complete_table_set_default(self, text, line, start_index, end_index):
         return self._complete_table_and_action(text, line)
@@ -1028,7 +1029,7 @@ class RuntimeAPI(cmd.Cmd):
 
         table = self.get_res("table", table_name, ResType.table)
 
-        self.client.bm_mt_reset_default_entry(0, table.name)
+        self.client.bm_mt_reset_default_entry(self.ctx_id, table.name)
 
     def complete_table_reset_default(self, text, line, start_index, end_index):
         return self._complete_tables(text)
@@ -1066,7 +1067,7 @@ class RuntimeAPI(cmd.Cmd):
         table_name = args[0]
         table = self.get_res("table", table_name, ResType.table)
 
-        print(self.client.bm_mt_get_num_entries(0, table.name))
+        print(self.client.bm_mt_get_num_entries(self.ctx_id, table.name))
 
     def complete_table_num_entries(self, text, line, start_index, end_index):
         return self._complete_tables(text)
@@ -1084,7 +1085,7 @@ class RuntimeAPI(cmd.Cmd):
         table_name = args[0]
         table = self.get_res("table", table_name, ResType.table)
 
-        self.client.bm_mt_clear_entries(0, table.name, False)
+        self.client.bm_mt_clear_entries(self.ctx_id, table.name, False)
 
     def complete_table_clear(self, text, line, start_index, end_index):
         return self._complete_tables(text)
@@ -1137,7 +1138,11 @@ class RuntimeAPI(cmd.Cmd):
         self.print_table_add(match_key, action_name, runtime_data)
 
         entry_handle = self.client.bm_mt_add_entry(
-            0, table.name, match_key, action.name, runtime_data,
+            self.ctx_id,
+            table.name,
+            match_key,
+            action.name,
+            runtime_data,
             BmAddEntryOptions(priority = priority)
         )
 
@@ -1173,7 +1178,7 @@ class RuntimeAPI(cmd.Cmd):
 
         print("Setting a", timeout_ms, "ms timeout for entry", entry_handle)
 
-        self.client.bm_mt_set_entry_ttl(0, table.name, entry_handle, timeout_ms)
+        self.client.bm_mt_set_entry_ttl(self.ctx_id, table.name, entry_handle, timeout_ms)
 
     def complete_table_set_timeout(self, text, line, start_index, end_index):
         return self._complete_tables(text)
@@ -1233,7 +1238,7 @@ class RuntimeAPI(cmd.Cmd):
 
         print("Deleting entry", entry_handle, "from", table_name)
 
-        self.client.bm_mt_delete_entry(0, table.name, entry_handle)
+        self.client.bm_mt_delete_entry(self.ctx_id, table.name, entry_handle)
 
     def complete_table_delete(self, text, line, start_index, end_index):
         return self._complete_tables(text)
@@ -1313,7 +1318,7 @@ class RuntimeAPI(cmd.Cmd):
         except:
             raise UIn_Error("Bad format for member handle")
 
-        self.client.bm_mt_act_prof_delete_member(0, act_prof.name, mbr_handle)
+        self.client.bm_mt_act_prof_delete_member(self.ctx_id, act_prof.name, mbr_handle)
 
     def complete_act_prof_delete_member(self, text, line, start_index, end_index):
         return self._complete_act_profs(text)
@@ -1473,7 +1478,7 @@ class RuntimeAPI(cmd.Cmd):
 
         print("Deleting entry", entry_handle, "from", table_name)
 
-        self.client.bm_mt_indirect_delete_entry(0, table.name, entry_handle)
+        self.client.bm_mt_indirect_delete_entry(self.ctx_id, table.name, entry_handle)
 
     def complete_table_indirect_delete(self, text, line, start_index, end_index):
         return self._complete_tables(text)
@@ -1507,7 +1512,7 @@ class RuntimeAPI(cmd.Cmd):
 
         table_name, handle = self.indirect_set_default_common(line)
 
-        self.client.bm_mt_indirect_set_default_member(0, table_name, handle)
+        self.client.bm_mt_indirect_set_default_member(self.ctx_id, table_name, handle)
 
     def complete_table_indirect_set_default(self, text, line, start_index, end_index):
         return self._complete_tables(text)
@@ -1521,7 +1526,7 @@ class RuntimeAPI(cmd.Cmd):
 
         table_name, handle = self.indirect_set_default_common(line, ws=True)
 
-        self.client.bm_mt_indirect_ws_set_default_group(0, table_name, handle)
+        self.client.bm_mt_indirect_ws_set_default_group(self.ctx_id, table_name, handle)
 
     def complete_table_indirect_set_default_with_group(self, text, line, start_index, end_index):
         return self._complete_tables(text)
@@ -1540,7 +1545,7 @@ class RuntimeAPI(cmd.Cmd):
 
         table = self.get_res("table", table_name, ResType.table)
 
-        self.client.bm_mt_indirect_reset_default_entry(0, table.name)
+        self.client.bm_mt_indirect_reset_default_entry(self.ctx_id, table.name)
 
     def complete_table_indirect_reset_default(self, text, line, start_index, end_index):
         return self._complete_tables(text)
@@ -1561,7 +1566,7 @@ class RuntimeAPI(cmd.Cmd):
 
         self.check_act_prof_ws(act_prof)
 
-        grp_handle = self.client.bm_mt_act_prof_create_group(0, act_prof.name)
+        grp_handle = self.client.bm_mt_act_prof_create_group(self.ctx_id, act_prof.name)
 
         print("Group has been created with handle", grp_handle)
 
@@ -1600,7 +1605,7 @@ class RuntimeAPI(cmd.Cmd):
         except:
             raise UIn_Error("Bad format for group handle")
 
-        self.client.bm_mt_act_prof_delete_group(0, act_prof.name, grp_handle)
+        self.client.bm_mt_act_prof_delete_group(self.ctx_id, act_prof.name, grp_handle)
 
     def complete_act_prof_delete_group(self, text, line, start_index, end_index):
         return self._complete_act_profs(text)
@@ -1720,7 +1725,7 @@ class RuntimeAPI(cmd.Cmd):
         self.exactly_n_args(args, 1)
         mgrp = self.get_mgrp(args[0])
         print("Creating multicast group", mgrp)
-        mgrp_hdl = self.mc_client.bm_mc_mgrp_create(0, mgrp)
+        mgrp_hdl = self.mc_client.bm_mc_mgrp_create(self.ctx_id, mgrp)
         assert(mgrp == mgrp_hdl)
 
     @handle_bad_input_mc
@@ -1731,7 +1736,7 @@ class RuntimeAPI(cmd.Cmd):
         self.exactly_n_args(args, 1)
         mgrp = self.get_mgrp(args[0])
         print("Destroying multicast group", mgrp)
-        self.mc_client.bm_mc_mgrp_destroy(0, mgrp)
+        self.mc_client.bm_mc_mgrp_destroy(self.ctx_id, mgrp)
 
     def ports_to_port_map_str(self, ports, description="port"):
         last_port_num = 0
@@ -1787,10 +1792,10 @@ class RuntimeAPI(cmd.Cmd):
         port_map_str, lag_map_str = self.parse_ports_and_lags(args)
         if self.pre_type == PreType.SimplePre:
             print("Creating node with rid", rid, "and with port map", port_map_str)
-            l1_hdl = self.mc_client.bm_mc_node_create(0, rid, port_map_str)
+            l1_hdl = self.mc_client.bm_mc_node_create(self.ctx_id, rid, port_map_str)
         else:
             print("Creating node with rid", rid, ", port map", port_map_str, "and lag map", lag_map_str)
-            l1_hdl = self.mc_client.bm_mc_node_create(0, rid, port_map_str, lag_map_str)
+            l1_hdl = self.mc_client.bm_mc_node_create(self.ctx_id, rid, port_map_str, lag_map_str)
         print("node was created with handle", l1_hdl)
 
     def get_node_handle(self, s):
@@ -1812,10 +1817,10 @@ class RuntimeAPI(cmd.Cmd):
         port_map_str, lag_map_str = self.parse_ports_and_lags(args)
         if self.pre_type == PreType.SimplePre:
             print("Updating node", l1_hdl, "with port map", port_map_str)
-            self.mc_client.bm_mc_node_update(0, l1_hdl, port_map_str)
+            self.mc_client.bm_mc_node_update(self.ctx_id, l1_hdl, port_map_str)
         else:
             print("Updating node", l1_hdl, "with port map", port_map_str, "and lag map", lag_map_str)
-            self.mc_client.bm_mc_node_update(0, l1_hdl, port_map_str, lag_map_str)
+            self.mc_client.bm_mc_node_update(self.ctx_id, l1_hdl, port_map_str, lag_map_str)
 
     @handle_bad_input_mc
     def do_mc_node_associate(self, line):
@@ -1829,7 +1834,7 @@ class RuntimeAPI(cmd.Cmd):
         mgrp = self.get_mgrp(args[0])
         l1_hdl = self.get_node_handle(args[1])
         print("Associating node", l1_hdl, "to multicast group", mgrp)
-        self.mc_client.bm_mc_node_associate(0, mgrp, l1_hdl)
+        self.mc_client.bm_mc_node_associate(self.ctx_id, mgrp, l1_hdl)
 
     @handle_bad_input_mc
     def do_mc_node_dissociate(self, line):
@@ -1840,7 +1845,7 @@ class RuntimeAPI(cmd.Cmd):
         mgrp = self.get_mgrp(args[0])
         l1_hdl = self.get_node_handle(args[1])
         print("Dissociating node", l1_hdl, "from multicast group", mgrp)
-        self.mc_client.bm_mc_node_dissociate(0, mgrp, l1_hdl)
+        self.mc_client.bm_mc_node_dissociate(self.ctx_id, mgrp, l1_hdl)
 
     @handle_bad_input_mc
     def do_mc_node_destroy(self, line):
@@ -1850,7 +1855,7 @@ class RuntimeAPI(cmd.Cmd):
         self.exactly_n_args(args, 1)
         l1_hdl = int(line.split()[0])
         print("Destroying node", l1_hdl)
-        self.mc_client.bm_mc_node_destroy(0, l1_hdl)
+        self.mc_client.bm_mc_node_destroy(self.ctx_id, l1_hdl)
 
     @handle_bad_input_mc
     def do_mc_set_lag_membership(self, line):
@@ -1872,13 +1877,13 @@ class RuntimeAPI(cmd.Cmd):
             raise UIn_Error("Bad format for lag index")
         port_map_str = self.ports_to_port_map_str(args[1:], description="lag")
         print("Setting lag membership:", lag_index, "<-", port_map_str)
-        self.mc_client.bm_mc_set_lag_membership(0, lag_index, port_map_str)
+        self.mc_client.bm_mc_set_lag_membership(self.ctx_id, lag_index, port_map_str)
 
     @handle_bad_input_mc
     def do_mc_dump(self, line):
         """Dump entries in multicast engine"""
         self.check_has_pre()
-        json_dump = self.mc_client.bm_mc_get_entries(0)
+        json_dump = self.mc_client.bm_mc_get_entries(self.ctx_id)
         try:
             mc_json = json.loads(json_dump)
         except:
@@ -1967,7 +1972,7 @@ class RuntimeAPI(cmd.Cmd):
                 new_rates.append(BmMeterRateConfig(r, b))
             except:
                 raise UIn_Error("Error while parsing rates")
-        self.client.bm_meter_array_set_rates(0, meter.name, new_rates)
+        self.client.bm_meter_array_set_rates(self.ctx_id, meter.name, new_rates)
 
     def complete_meter_array_set_rates(self, text, line, start_index, end_index):
         return self._complete_meters(text)
@@ -2004,9 +2009,9 @@ class RuntimeAPI(cmd.Cmd):
                 raise UIn_Error("Error while parsing rates")
         if meter.is_direct:
             table_name = meter.binding
-            self.client.bm_mt_set_meter_rates(0, table_name, index, new_rates)
+            self.client.bm_mt_set_meter_rates(self.ctx_id, table_name, index, new_rates)
         else:
-            self.client.bm_meter_set_rates(0, meter.name, index, new_rates)
+            self.client.bm_meter_set_rates(self.ctx_id, meter.name, index, new_rates)
 
     def complete_meter_set_rates(self, text, line, start_index, end_index):
         return self._complete_meters(text)
@@ -2025,9 +2030,9 @@ class RuntimeAPI(cmd.Cmd):
         # meter.rate_count
         if meter.is_direct:
             table_name = meter.binding
-            rates = self.client.bm_mt_get_meter_rates(0, table_name, index)
+            rates = self.client.bm_mt_get_meter_rates(self.ctx_id, table_name, index)
         else:
-            rates = self.client.bm_meter_get_rates(0, meter.name, index)
+            rates = self.client.bm_meter_get_rates(self.ctx_id, meter.name, index)
         if len(rates) != meter.rate_count:
             print("WARNING: expected", meter.rate_count, "rates", end=' ')
             print("but only received", len(rates))
@@ -2057,9 +2062,9 @@ class RuntimeAPI(cmd.Cmd):
             table_name = counter.binding
             print("this is the direct counter for table", table_name)
             # index = index & 0xffffffff
-            value = self.client.bm_mt_read_counter(0, table_name, index)
+            value = self.client.bm_mt_read_counter(self.ctx_id, table_name, index)
         else:
-            value = self.client.bm_counter_read(0, counter.name, index)
+            value = self.client.bm_counter_read(self.ctx_id, counter.name, index)
         print("%s[%d]= " % (counter_name, index), value)
 
     def complete_counter_read(self, text, line, start_index, end_index):
@@ -2093,9 +2098,9 @@ class RuntimeAPI(cmd.Cmd):
         if counter.is_direct:
             table_name = counter.binding
             print("writing to direct counter for table", table_name)
-            value = self.client.bm_mt_write_counter(0, table_name, index, BmCounterValue(packets=pkts, bytes = byts))
+            value = self.client.bm_mt_write_counter(self.ctx_id, table_name, index, BmCounterValue(packets=pkts, bytes = byts))
         else:
-            self.client.bm_counter_write(0, counter_name, index, BmCounterValue(packets=pkts, bytes = byts))
+            self.client.bm_counter_write(self.ctx_id, counter_name, index, BmCounterValue(packets=pkts, bytes = byts))
         print("%s[%d] has been updated" % (counter_name, index))
 
     def complete_counter_write(self, text, line, start_index, end_index):
@@ -2111,9 +2116,9 @@ class RuntimeAPI(cmd.Cmd):
         if counter.is_direct:
             table_name = counter.binding
             print("this is the direct counter for table", table_name)
-            value = self.client.bm_mt_reset_counters(0, table_name)
+            value = self.client.bm_mt_reset_counters(self.ctx_id, table_name)
         else:
-            value = self.client.bm_counter_reset_all(0, counter.name)
+            value = self.client.bm_counter_reset_all(self.ctx_id, counter.name)
 
     def complete_counter_reset(self, text, line, start_index, end_index):
         return self._complete_counters(text)
@@ -2136,11 +2141,11 @@ class RuntimeAPI(cmd.Cmd):
                 index = int(index)
             except:
                 raise UIn_Error("Bad format for index")
-            value = self.client.bm_register_read(0, register.name, index)
+            value = self.client.bm_register_read(self.ctx_id, register.name, index)
             print("{}[{}]=".format(register_name, index), value)
         else:
             sys.stderr.write("register index omitted, reading entire array\n")
-            entries = self.client.bm_register_read_all(0, register.name)
+            entries = self.client.bm_register_read_all(self.ctx_id, register.name)
             print("{}=".format(register_name), ", ".join(
                 [str(e) for e in entries]))
 
@@ -2165,7 +2170,7 @@ class RuntimeAPI(cmd.Cmd):
             value = int(value)
         except:
             raise UIn_Error("Bad format for value, must be an integer")
-        self.client.bm_register_write(0, register.name, index, value)
+        self.client.bm_register_write(self.ctx_id, register.name, index, value)
 
     def complete_register_write(self, text, line, start_index, end_index):
         return self._complete_registers(text)
@@ -2181,7 +2186,7 @@ class RuntimeAPI(cmd.Cmd):
         register_name = args[0]
         register = self.get_res("register", register_name,
                                 ResType.register_array)
-        self.client.bm_register_reset(0, register.name)
+        self.client.bm_register_reset(self.ctx_id, register.name)
 
     def complete_register_reset(self, text, line, start_index, end_index):
         return self._complete_registers(text)
@@ -2274,7 +2279,7 @@ class RuntimeAPI(cmd.Cmd):
         except:
             raise UIn_Error("Bad format for entry handle")
 
-        entry = self.client.bm_mt_get_entry(0, table.name, entry_handle)
+        entry = self.client.bm_mt_get_entry(self.ctx_id, table.name, entry_handle)
         self.dump_one_entry(table, entry)
 
     def complete_table_dump_entry(self, text, line, start_index, end_index):
@@ -2359,12 +2364,12 @@ class RuntimeAPI(cmd.Cmd):
 
     def _dump_act_prof(self, act_prof):
         act_prof_name = act_prof.name
-        members = self.client.bm_mt_act_prof_get_members(0, act_prof.name)
+        members = self.client.bm_mt_act_prof_get_members(self.ctx_id, act_prof.name)
         print("==========")
         print("MEMBERS")
         self.dump_members(members)
         if act_prof.with_selection:
-            groups = self.client.bm_mt_act_prof_get_groups(0, act_prof.name)
+            groups = self.client.bm_mt_act_prof_get_groups(self.ctx_id, act_prof.name)
             print("==========")
             print("GROUPS")
             self.dump_groups(groups)
@@ -2395,7 +2400,7 @@ class RuntimeAPI(cmd.Cmd):
         self.exactly_n_args(args, 1)
         table_name = args[0]
         table = self.get_res("table", table_name, ResType.table)
-        entries = self.client.bm_mt_get_entries(0, table.name)
+        entries = self.client.bm_mt_get_entries(self.ctx_id, table.name)
 
         print("==========")
         print("TABLE ENTRIES")
@@ -2410,7 +2415,7 @@ class RuntimeAPI(cmd.Cmd):
             self._dump_act_prof(table.action_prof)
 
         # default entry
-        default_entry = self.client.bm_mt_get_default_entry(0, table.name)
+        default_entry = self.client.bm_mt_get_default_entry(self.ctx_id, table.name)
         print("==========")
         print("Dumping default entry")
         self.dump_action_entry(default_entry)
@@ -2479,7 +2484,7 @@ class RuntimeAPI(cmd.Cmd):
         pvs = self.get_res("parser value set", pvs_name, ResType.parse_vset)
 
         v = parse_pvs_value(args[1], pvs.bitwidth)
-        self.client.bm_parse_vset_add(0, pvs_name, v)
+        self.client.bm_parse_vset_add(self.ctx_id, pvs_name, v)
 
     def complete_pvs_add(self, text, line, start_index, end_index):
         return self._complete_pvs(text)
@@ -2497,7 +2502,7 @@ class RuntimeAPI(cmd.Cmd):
         pvs = self.get_res("parser value set", pvs_name, ResType.parse_vset)
 
         v = parse_pvs_value(args[1], pvs.bitwidth)
-        self.client.bm_parse_vset_remove(0, pvs_name, v)
+        self.client.bm_parse_vset_remove(self.ctx_id, pvs_name, v)
 
     def complete_pvs_remove(self, text, line, start_index, end_index):
         return self._complete_pvs(text)
@@ -2514,7 +2519,7 @@ class RuntimeAPI(cmd.Cmd):
         pvs_name = args[0]
         pvs = self.get_res("parser value set", pvs_name, ResType.parse_vset)
 
-        values = self.client.bm_parse_vset_get(0, pvs_name)
+        values = self.client.bm_parse_vset_get(self.ctx_id, pvs_name)
         for v in values:
             print(hexstr(v))
 
@@ -2532,7 +2537,7 @@ class RuntimeAPI(cmd.Cmd):
         pvs_name = args[0]
         pvs = self.get_res("parser value set", pvs_name, ResType.parse_vset)
 
-        self.client.bm_parse_vset_clear(0, pvs_name)
+        self.client.bm_parse_vset_clear(self.ctx_id, pvs_name)
 
     def complete_pvs_clear(self, text, line, start_index, end_index):
         return self._complete_pvs(text)
@@ -2609,7 +2614,7 @@ class RuntimeAPI(cmd.Cmd):
         args = line.split()
         self.exactly_n_args(args, 1)
         filename = args[0]
-        json_cfg = self.client.bm_get_config(0)
+        json_cfg = self.client.bm_get_config(self.ctx_id)
         with open(filename, 'w') as f:
             f.write(json_cfg)
 
@@ -2636,7 +2641,7 @@ class RuntimeAPI(cmd.Cmd):
         config_args = [conversion_fn(a) for a in args[1:4]]
         config_args += [parse_bool(a) for a in args[4:6]]
         crc_config = config_type(*config_args)
-        thrift_fn(0, name, crc_config)
+        thrift_fn(self.ctx_id, name, crc_config)
 
     def _complete_crc(self, text, crc_width=16):
         crcs = sorted(

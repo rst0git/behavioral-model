@@ -80,7 +80,13 @@ class MtPsaSwitchAPI(runtime_CLI.RuntimeAPI):
         """Load config from context: switch_context <ContextID>"""
         args = line.split()
         self.exactly_n_args(args, 1)
-        runtime_CLI.load_json_str(bmpy_utils.get_json_config(standard_client=self.client, ctx_id=int(args[0])))
+        self.ctx_id = int(args[0])
+        runtime_CLI.load_json_str(
+          bmpy_utils.get_json_config(
+              standard_client=self.client,
+              ctx_id=self.ctx_id
+          )
+        )
         return
 
 def main():
