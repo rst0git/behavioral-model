@@ -848,7 +848,7 @@ class RuntimeAPI(cmd.Cmd):
         return True
 
     def do_shell(self, line):
-        "Run a shell command"
+        """Run a shell command"""
         output = os.popen(line).read()
         print output
 
@@ -882,14 +882,14 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_show_tables(self, line):
-        "List tables defined in the P4 program: show_tables"
+        """List tables defined in the P4 program: show_tables"""
         self.exactly_n_args(line.split(), 0)
         for table_name in sorted(TABLES):
             print TABLES[table_name].table_str()
 
     @handle_bad_input
     def do_show_actions(self, line):
-        "List actions defined in the P4 program: show_actions"
+        """List actions defined in the P4 program: show_actions"""
         self.exactly_n_args(line.split(), 0)
         for action_name in sorted(ACTIONS):
             print ACTIONS[action_name].action_str()
@@ -902,7 +902,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_table_show_actions(self, line):
-        "List one table's actions as per the P4 program: table_show_actions <table_name>"
+        """
+        List one table's actions as per the P4 program:
+            table_show_actions <table_name>
+        """
         args = line.split()
         self.exactly_n_args(args, 1)
         table_name = args[0]
@@ -915,7 +918,7 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_table_info(self, line):
-        "Show info about a table: table_info <table_name>"
+        """Show info about a table: table_info <table_name>"""
         args = line.split()
         self.exactly_n_args(args, 1)
         table_name = args[0]
@@ -980,7 +983,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_table_set_default(self, line):
-        "Set default action for a match table: table_set_default <table name> <action name> <action parameters>"
+        """
+        Set default action for a match table:
+            table_set_default <table name> <action name> <action parameters>
+        """
         args = line.split()
 
         self.at_least_n_args(args, 2)
@@ -1009,7 +1015,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_table_reset_default(self, line):
-        "Reset default entry for a match table: table_reset_default <table name>"
+        """
+        Reset default entry for a match table:
+            table_reset_default <table name>
+        """
         args = line.split()
 
         self.exactly_n_args(args, 1)
@@ -1045,7 +1054,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_table_num_entries(self, line):
-        "Return the number of entries in a match table (direct or indirect): table_num_entries <table name>"
+        """
+        Return the number of entries in a match table (direct or indirect):
+            table_num_entries <table name>
+        """
         args = line.split()
 
         self.exactly_n_args(args, 1)
@@ -1060,7 +1072,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_table_clear(self, line):
-        "Clear all entries in a match table (direct or indirect), but not the default entry: table_clear <table name>"
+        """
+        Clear all entries in a match table (direct or indirect), but not the default entry:
+            table_clear <table name>
+        """
         args = line.split()
 
         self.exactly_n_args(args, 1)
@@ -1075,7 +1090,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_table_add(self, line):
-        "Add entry to a match table: table_add <table name> <action name> <match fields> => <action parameters> [priority]"
+        """
+        Add entry to a match table:
+            table_add <table name> <action name> <match fields> => <action parameters> [priority]
+        """
         args = line.split()
 
         self.at_least_n_args(args, 3)
@@ -1129,7 +1147,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_table_set_timeout(self, line):
-        "Set a timeout in ms for a given entry; the table has to support timeouts: table_set_timeout <table_name> <entry handle> <timeout (ms)>"
+        """
+        Set a timeout in ms for a given entry; the table has to support timeouts:
+            table_set_timeout <table_name> <entry handle> <timeout (ms)>
+        """
         args = line.split()
         self.exactly_n_args(args, 3)
 
@@ -1158,7 +1179,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_table_modify(self, line):
-        "Add entry to a match table: table_modify <table name> <action name> <entry handle> [action parameters]"
+        """
+        Add entry to a match table:
+            table_modify <table name> <action name> <entry handle> [action parameters]
+        """
         args = line.split()
 
         self.at_least_n_args(args, 3)
@@ -1230,7 +1254,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_act_prof_create_member(self, line):
-        "Add a member to an action profile: act_prof_create_member <action profile name> <action_name> [action parameters]"
+        """
+        Add a member to an action profile:
+            act_prof_create_member <action profile name> <action_name> [action parameters]
+        """
         args = line.split()
 
         self.at_least_n_args(args, 2)
@@ -1257,7 +1284,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @deprecated_act_prof("act_prof_create_member")
     def do_table_indirect_create_member(self, line):
-        "Add a member to an indirect match table: table_indirect_create_member <table name> <action_name> [action parameters]"
+        """
+        Add a member to an indirect match table:
+            table_indirect_create_member <table name> <action_name> [action parameters]
+        """
         pass
 
     def complete_table_indirect_create_member(self, text, line, start_index, end_index):
@@ -1265,7 +1295,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_act_prof_delete_member(self, line):
-        "Delete a member in an action profile: act_prof_delete_member <action profile name> <member handle>"
+        """
+        Delete a member in an action profile:
+            act_prof_delete_member <action profile name> <member handle>
+        """
         args = line.split()
 
         self.exactly_n_args(args, 2)
@@ -1286,7 +1319,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @deprecated_act_prof("act_prof_delete_member")
     def do_table_indirect_delete_member(self, line):
-        "Delete a member in an indirect match table: table_indirect_delete_member <table name> <member handle>"
+        """
+        Delete a member in an indirect match table:
+            table_indirect_delete_member <table name> <member handle>
+        """
         pass
 
     def complete_table_indirect_delete_member(self, text, line, start_index, end_index):
@@ -1294,7 +1330,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_act_prof_modify_member(self, line):
-        "Modify member in an action profile: act_prof_modify_member <action profile name> <action_name> <member_handle> [action parameters]"
+        """
+        Modify member in an action profile:
+            act_prof_modify_member <action profile name> <action_name> <member_handle> [action parameters]
+        """
         args = line.split()
 
         self.at_least_n_args(args, 3)
@@ -1327,7 +1366,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @deprecated_act_prof("act_prof_modify_member")
     def do_table_indirect_modify_member(self, line):
-        "Modify member in an indirect match table: table_indirect_modify_member <table name> <action_name> <member_handle> [action parameters]"
+        """
+        Modify member in an indirect match table:
+            table_indirect_modify_member <table name> <action_name> <member_handle> [action parameters]
+        """
         pass
 
     def complete_table_indirect_modify_member(self, text, line, start_index, end_index):
@@ -1377,8 +1419,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_table_indirect_add(self, line):
-        "Add entry to an indirect match table: table_indirect_add <table name> <match fields> => <member handle> [priority]"
-
+        """
+        Add entry to an indirect match table:
+            table_indirect_add <table name> <match fields> => <member handle> [priority]
+        """
         table_name, match_key, handle, options = self.indirect_add_common(line)
 
         entry_handle = self.client.bm_mt_indirect_add_entry(
@@ -1392,8 +1436,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_table_indirect_add_with_group(self, line):
-        "Add entry to an indirect match table: table_indirect_add <table name> <match fields> => <group handle> [priority]"
-
+        """
+        Add entry to an indirect match table:
+            table_indirect_add <table name> <match fields> => <group handle> [priority]
+        """
         table_name, match_key, handle, options = self.indirect_add_common(line, ws=True)
 
         entry_handle = self.client.bm_mt_indirect_ws_add_entry(
@@ -1407,7 +1453,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_table_indirect_delete(self, line):
-        "Delete entry from an indirect match table: table_indirect_delete <table name> <entry handle>"
+        """
+        Delete entry from an indirect match table:
+            table_indirect_delete <table name> <entry handle>
+        """
         args = line.split()
 
         self.exactly_n_args(args, 2)
@@ -1450,7 +1499,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_table_indirect_set_default(self, line):
-        "Set default member for indirect match table: table_indirect_set_default <table name> <member handle>"
+        """
+        Set default member for indirect match table:
+            table_indirect_set_default <table name> <member handle>
+        """
 
         table_name, handle = self.indirect_set_default_common(line)
 
@@ -1461,7 +1513,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_table_indirect_set_default_with_group(self, line):
-        "Set default group for indirect match table: table_indirect_set_default <table name> <group handle>"
+        """
+        Set default group for indirect match table:
+            table_indirect_set_default <table name> <group handle>
+        """
 
         table_name, handle = self.indirect_set_default_common(line, ws=True)
 
@@ -1472,7 +1527,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_table_indirect_reset_default(self, line):
-        "Reset default entry for indirect match table: table_indirect_reset_default <table name>"
+        """
+        Reset default entry for indirect match table:
+            table_indirect_reset_default <table name>
+        """
         args = line.split()
 
         self.exactly_n_args(args, 1)
@@ -1488,7 +1546,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_act_prof_create_group(self, line):
-        "Add a group to an action pofile: act_prof_create_group <action profile name>"
+        """
+        Add a group to an action pofile:
+            act_prof_create_group <action profile name>
+        """
         args = line.split()
 
         self.exactly_n_args(args, 1)
@@ -1508,7 +1569,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @deprecated_act_prof("act_prof_create_group", with_selection=True)
     def do_table_indirect_create_group(self, line):
-        "Add a group to an indirect match table: table_indirect_create_group <table name>"
+        """
+        Add a group to an indirect match table:
+            table_indirect_create_group <table name>
+        """
         pass
 
     def complete_table_indirect_create_group(self, text, line, start_index, end_index):
@@ -1516,7 +1580,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_act_prof_delete_group(self, line):
-        "Delete a group from an action profile: act_prof_delete_group <action profile name> <group handle>"
+        """
+        Delete a group from an action profile:
+            act_prof_delete_group <action profile name> <group handle>
+        """
         args = line.split()
 
         self.exactly_n_args(args, 2)
@@ -1547,7 +1614,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_act_prof_add_member_to_group(self, line):
-        "Add member to group in an action profile: act_prof_add_member_to_group <action profile name> <member handle> <group handle>"
+        """
+        Add member to group in an action profile:
+            act_prof_add_member_to_group <action profile name> <member handle> <group handle>
+        """
         args = line.split()
 
         self.exactly_n_args(args, 3)
@@ -1576,7 +1646,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @deprecated_act_prof("act_prof_add_member_to_group", with_selection=True)
     def do_table_indirect_add_member_to_group(self, line):
-        "Add member to group: table_indirect_add_member_to_group <table name> <member handle> <group handle>"
+        """
+        Add member to group:
+            table_indirect_add_member_to_group <table name> <member handle> <group handle>
+        """
         pass
 
     def complete_table_indirect_add_member_to_group(self, text, line, start_index, end_index):
@@ -1584,7 +1657,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_act_prof_remove_member_from_group(self, line):
-        "Remove member from group in action profile: act_prof_remove_member_from_group <action profile name> <member handle> <group handle>"
+        """
+        Remove member from group in action profile:
+            act_prof_remove_member_from_group <action profile name> <member handle> <group handle>
+        """
         args = line.split()
 
         self.exactly_n_args(args, 3)
@@ -1613,7 +1689,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @deprecated_act_prof("act_prof_remove_member_from_group", with_selection=True)
     def do_table_indirect_remove_member_from_group(self, line):
-        "Remove member from group: table_indirect_remove_member_from_group <table name> <member handle> <group handle>"
+        """
+        Remove member from group:
+            table_indirect_remove_member_from_group <table name> <member handle> <group handle>
+        """
         pass
 
     def complete_table_indirect_remove_member_from_group(self, text, line, start_index, end_index):
@@ -1634,7 +1713,7 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input_mc
     def do_mc_mgrp_create(self, line):
-        "Create multicast group: mc_mgrp_create <group id>"
+        """Create multicast group: mc_mgrp_create <group id>"""
         self.check_has_pre()
         args = line.split()
         self.exactly_n_args(args, 1)
@@ -1645,7 +1724,7 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input_mc
     def do_mc_mgrp_destroy(self, line):
-        "Destroy multicast group: mc_mgrp_destroy <group id>"
+        """Destroy multicast group: mc_mgrp_destroy <group id>"""
         self.check_has_pre()
         args = line.split()
         self.exactly_n_args(args, 1)
@@ -1693,7 +1772,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input_mc
     def do_mc_node_create(self, line):
-        "Create multicast node: mc_node_create <rid> <space-separated port list> [ | <space-separated lag list> ]"
+        """
+        Create multicast node:
+            mc_node_create <rid> <space-separated port list> [ | <space-separated lag list> ]
+        """
         self.check_has_pre()
         args = line.split()
         self.at_least_n_args(args, 1)
@@ -1718,7 +1800,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input_mc
     def do_mc_node_update(self, line):
-        "Update multicast node: mc_node_update <node handle> <space-separated port list> [ | <space-separated lag list> ]"
+        """
+        Update multicast node:
+            mc_node_update <node handle> <space-separated port list> [ | <space-separated lag list> ]
+        """
         self.check_has_pre()
         args = line.split()
         self.at_least_n_args(args, 2)
@@ -1733,7 +1818,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input_mc
     def do_mc_node_associate(self, line):
-        "Associate node to multicast group: mc_node_associate <group handle> <node handle>"
+        """
+        Associate node to multicast group:
+            mc_node_associate <group handle> <node handle>
+        """
         self.check_has_pre()
         args = line.split()
         self.exactly_n_args(args, 2)
@@ -1744,7 +1832,7 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input_mc
     def do_mc_node_dissociate(self, line):
-        "Dissociate node from multicast group: mc_node_associate <group handle> <node handle>"
+        """Dissociate node from multicast group: mc_node_associate <group handle> <node handle>"""
         self.check_has_pre()
         args = line.split()
         self.exactly_n_args(args, 2)
@@ -1755,7 +1843,7 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input_mc
     def do_mc_node_destroy(self, line):
-        "Destroy multicast node: mc_node_destroy <node handle>"
+        """Destroy multicast node: mc_node_destroy <node handle>"""
         self.check_has_pre()
         args = line.split()
         self.exactly_n_args(args, 1)
@@ -1765,7 +1853,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input_mc
     def do_mc_set_lag_membership(self, line):
-        "Set lag membership of port list: mc_set_lag_membership <lag index> <space-separated port list>"
+        """
+        Set lag membership of port list:
+            mc_set_lag_membership <lag index> <space-separated port list>
+        """
         self.check_has_pre()
         if self.pre_type != PreType.SimplePreLAG:
             raise UIn_Error(
@@ -1784,7 +1875,7 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input_mc
     def do_mc_dump(self, line):
-        "Dump entries in multicast engine"
+        """Dump entries in multicast engine"""
         self.check_has_pre()
         json_dump = self.mc_client.bm_mc_get_entries(0)
         try:
@@ -1844,13 +1935,18 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_swap_configs(self, line):
-        "Swap the 2 existing configs, need to have called load_new_config_file before"
+        """
+        Swap the 2 existing configs, need to have called load_new_config_file before
+        """
         print "Swapping configs"
         self.client.bm_swap_configs()
 
     @handle_bad_input
     def do_meter_array_set_rates(self, line):
-        "Configure rates for an entire meter array: meter_array_set_rates <name> <rate_1>:<burst_1> <rate_2>:<burst_2> ..."
+        """
+        Configure rates for an entire meter array:
+            meter_array_set_rates <name> <rate_1>:<burst_1> <rate_2>:<burst_2> ...
+        """
         args = line.split()
         self.at_least_n_args(args, 1)
         meter_name = args[0]
@@ -1877,7 +1973,11 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_meter_set_rates(self, line):
-        "Configure rates for a meter: meter_set_rates <name> <index> <rate_1>:<burst_1> <rate_2>:<burst_2> ...\nRate uses units/microsecond and burst uses units where units is bytes or packets"
+        """
+        Configure rates for a meter:
+            meter_set_rates <name> <index> <rate_1>:<burst_1> <rate_2>:<burst_2> ...
+        Rate uses units/microsecond and burst uses units where units is bytes or packets
+        """
         args = line.split()
         self.at_least_n_args(args, 2)
         meter_name = args[0]
@@ -1912,7 +2012,7 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_meter_get_rates(self, line):
-        "Retrieve rates for a meter: meter_get_rates <name> <index>"
+        """Retrieve rates for a meter: meter_get_rates <name> <index>"""
         args = line.split()
         self.exactly_n_args(args, 2)
         meter_name = args[0]
@@ -1942,7 +2042,7 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_counter_read(self, line):
-        "Read counter value: counter_read <name> <index>"
+        """Read counter value: counter_read <name> <index>"""
         args = line.split()
         self.exactly_n_args(args, 2)
         counter_name = args[0]
@@ -1966,7 +2066,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_counter_write(self, line):
-        "Write counter value: counter_write <name> <index> <packets> <bytes>"
+        """
+        Write counter value:
+            counter_write <name> <index> <packets> <bytes>
+        """
         args = line.split()
         self.exactly_n_args(args, 4)
         counter_name = args[0]
@@ -1999,7 +2102,7 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_counter_reset(self, line):
-        "Reset counter: counter_reset <name>"
+        """Reset counter: counter_reset <name>"""
         args = line.split()
         self.exactly_n_args(args, 1)
         counter_name = args[0]
@@ -2019,7 +2122,7 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_register_read(self, line):
-        "Read register value: register_read <name> [index]"
+        """Read register value: register_read <name> [index]"""
         args = line.split()
         self.at_least_n_args(args, 1)
         register_name = args[0]
@@ -2045,7 +2148,7 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_register_write(self, line):
-        "Write register value: register_write <name> <index> <value>"
+        """Write register value: register_write <name> <index> <value>"""
         args = line.split()
         self.exactly_n_args(args, 3)
         register_name = args[0]
@@ -2068,7 +2171,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_register_reset(self, line):
-        "Reset all the cells in the register array to 0: register_reset <name>"
+        """
+        Reset all the cells in the register array to 0:
+            register_reset <name>
+        """
         args = line.split()
         self.exactly_n_args(args, 1)
         register_name = args[0]
@@ -2152,7 +2258,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_table_dump_entry(self, line):
-        "Display some information about a table entry: table_dump_entry <table name> <entry handle>"
+        """
+        Display some information about a table entry:
+            table_dump_entry <table name> <entry handle>
+        """
         args = line.split()
         self.exactly_n_args(args, 2)
         table_name = args[0]
@@ -2172,7 +2281,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_act_prof_dump_member(self, line):
-        "Display some information about a member: act_prof_dump_member <action profile name> <member handle>"
+        """
+        Display some information about a member:
+            act_prof_dump_member <action profile name> <member handle>
+        """
         args = line.split()
         self.exactly_n_args(args, 2)
 
@@ -2198,7 +2310,10 @@ class RuntimeAPI(cmd.Cmd):
     @deprecated_act_prof("act_prof_dump_member", with_selection=False,
                          strictly_deprecated=False)
     def do_table_dump_member(self, line):
-        "Display some information about a member: table_dump_member <table name> <member handle>"
+        """
+        Display some information about a member:
+            table_dump_member <table name> <member handle>
+        """
         pass
 
     def complete_table_dump_member(self, text, line, start_index, end_index):
@@ -2206,7 +2321,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_act_prof_dump_group(self, line):
-        "Display some information about a group: table_dump_group <action profile name> <group handle>"
+        """
+        Display some information about a group:
+            table_dump_group <action profile name> <group handle>
+        """
         args = line.split()
         self.exactly_n_args(args, 2)
 
@@ -2229,7 +2347,10 @@ class RuntimeAPI(cmd.Cmd):
     @deprecated_act_prof("act_prof_dump_group", with_selection=False,
                          strictly_deprecated=False)
     def do_table_dump_group(self, line):
-        "Display some information about a group: table_dump_group <table name> <group handle>"
+        """
+        Display some information about a group:
+            table_dump_group <table name> <group handle>
+        """
         pass
 
     def complete_table_dump_group(self, text, line, start_index, end_index):
@@ -2249,7 +2370,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_act_prof_dump(self, line):
-        "Display entries in an action profile: act_prof_dump <action profile name>"
+        """
+        Display entries in an action profile:
+            act_prof_dump <action profile name>
+        """
         args = line.split()
         self.exactly_n_args(args, 1)
         act_prof_name = args[0]
@@ -2262,7 +2386,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_table_dump(self, line):
-        "Display entries in a match-table: table_dump <table name>"
+        """
+        Display entries in a match-table:
+            table_dump <table name>
+        """
         args = line.split()
         self.exactly_n_args(args, 1)
         table_name = args[0]
@@ -2294,7 +2421,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_table_dump_entry_from_key(self, line):
-        "Display some information about a table entry: table_dump_entry_from_key <table name> <match fields> [priority]"
+        """
+        Display some information about a table entry:
+            table_dump_entry_from_key <table name> <match fields> [priority]
+        """
         args = line.split()
         self.at_least_n_args(args, 1)
         table_name = args[0]
@@ -2330,7 +2460,7 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_show_pvs(self, line):
-        "List parser value sets defined in the P4 program: show_pvs"
+        """List parser value sets defined in the P4 program: show_pvs"""
         self.exactly_n_args(line.split(), 0)
         for pvs_name in sorted(PARSE_VSETS):
             print PARSE_VSETS[pvs_name].parse_vset_str()
@@ -2338,7 +2468,8 @@ class RuntimeAPI(cmd.Cmd):
     @handle_bad_input
     def do_pvs_add(self, line):
         """
-        Add a value to a parser value set: pvs_add <pvs_name> <value>
+        Add a value to a parser value set:
+            pvs_add <pvs_name> <value>
         bmv2 will not report an error if the value already exists.
         """
         args = line.split()
@@ -2355,7 +2486,8 @@ class RuntimeAPI(cmd.Cmd):
     @handle_bad_input
     def do_pvs_remove(self, line):
         """
-        Remove a value from a parser value set: pvs_remove <pvs_name> <value>
+        Remove a value from a parser value set:
+            pvs_remove <pvs_name> <value>
         bmv2 will not report an error if the value does not exist.
         """
         args = line.split()
@@ -2372,7 +2504,8 @@ class RuntimeAPI(cmd.Cmd):
     @handle_bad_input
     def do_pvs_get(self, line):
         """
-        Print all values from a parser value set: pvs_get <pvs_name>
+        Print all values from a parser value set:
+            pvs_get <pvs_name>
         Values are displayed in no particular order, one per line.
         """
         args = line.split()
@@ -2390,7 +2523,8 @@ class RuntimeAPI(cmd.Cmd):
     @handle_bad_input
     def do_pvs_clear(self, line):
         """
-        Remove all values from a parser value set: pvs_clear <pvs_name>
+        Remove all values from a parser value set:
+            pvs_clear <pvs_name>
         """
         args = line.split()
         self.exactly_n_args(args, 1)
@@ -2404,7 +2538,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_port_add(self, line):
-        "Add a port to the switch (behavior depends on device manager used): port_add <iface_name> <port_num> [pcap_path]"
+        """
+        Add a port to the switch (behavior depends on device manager used):
+            port_add <iface_name> <port_num> [pcap_path]
+        """
         args = line.split()
         self.at_least_n_args(args, 2)
         iface_name = args[0]
@@ -2419,7 +2556,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_port_remove(self, line):
-        "Removes a port from the switch (behavior depends on device manager used): port_remove <port_num>"
+        """
+        Remove a port from the switch (behavior depends on device manager used):
+            port_remove <port_num>
+        """
         args = line.split()
         self.exactly_n_args(args, 1)
         try:
@@ -2430,7 +2570,7 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_show_ports(self, line):
-        "Shows the ports connected to the switch: show_ports"
+        """Shows the ports connected to the switch: show_ports"""
         self.exactly_n_args(line.split(), 0)
         ports = self.client.bm_dev_mgr_show_ports()
         print "{:^10}{:^20}{:^10}{}".format(
@@ -2445,7 +2585,7 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_switch_info(self, line):
-        "Show some basic info about the switch: switch_info"
+        """Show some basic info about the switch: switch_info"""
         self.exactly_n_args(line.split(), 0)
         info = self.client.bm_mgmt_get_info()
         attributes = [t[2] for t in info.thrift_spec[1:]]
@@ -2455,13 +2595,16 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_reset_state(self, line):
-        "Reset all state in the switch (table entries, registers, ...), but P4 config is preserved: reset_state"
+        """
+        Reset all state in the switch (table entries, registers, ...),
+        but P4 config is preserved: reset_state
+        """
         self.exactly_n_args(line.split(), 0)
         self.client.bm_reset_state()
 
     @handle_bad_input
     def do_write_config_to_file(self, line):
-        "Retrieves the JSON config currently used by the switch and dumps it to user-specified file"
+        """Retrieves the JSON config currently used by the switch and dumps it to user-specified file"""
         args = line.split()
         self.exactly_n_args(args, 1)
         filename = args[0]
@@ -2471,7 +2614,7 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_serialize_state(self, line):
-        "Serialize the switch state and dumps it to user-specified file"
+        """Serialize the switch state and dumps it to user-specified file"""
         args = line.split()
         self.exactly_n_args(args, 1)
         filename = args[0]
@@ -2503,7 +2646,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_set_crc16_parameters(self, line):
-        "Change the parameters for a custom crc16 hash: set_crc16_parameters <name> <polynomial> <initial remainder> <final xor value> <reflect data?> <reflect remainder?>"
+        """
+        Change the parameters for a custom crc16 hash:
+            set_crc16_parameters <name> <polynomial> <initial remainder> <final xor value> <reflect data?> <reflect remainder?>
+        """
         self.set_crc_parameters_common(line, 16)
 
     def complete_set_crc16_parameters(self, text, line, start_index, end_index):
@@ -2511,7 +2657,10 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_set_crc32_parameters(self, line):
-        "Change the parameters for a custom crc32 hash: set_crc32_parameters <name> <polynomial> <initial remainder> <final xor value> <reflect data?> <reflect remainder?>"
+        """
+        Change the parameters for a custom crc32 hash:
+            set_crc32_parameters <name> <polynomial> <initial remainder> <final xor value> <reflect data?> <reflect remainder?>
+        """
         self.set_crc_parameters_common(line, 32)
 
     def complete_set_crc32_parameters(self, text, line, start_index, end_index):
