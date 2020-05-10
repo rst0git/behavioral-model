@@ -344,9 +344,6 @@ MtPsaSwitch::ingress_thread() {
 }
 
 void MtPsaSwitch::egress_thread(size_t user_id) {
-  PHV *phv;
-  PHV *user_phv;
-
   while (1) {
     std::unique_ptr<Packet> packet;
     size_t egress_port;
@@ -356,7 +353,7 @@ void MtPsaSwitch::egress_thread(size_t user_id) {
     if (packet == nullptr)
       break;
 
-    phv = packet->get_phv();
+    PHV *phv = packet->get_phv();
 
     // this reset() marks all headers as invalid - this is important since MTPSA
     // deparses packets after ingress processing - so no guarantees can be made
@@ -372,15 +369,12 @@ void MtPsaSwitch::egress_thread(size_t user_id) {
     }
     parser->parse(packet.get());
 
-    // Change to user context
-    BMLOG_DEBUG_PKT(*packet, "User ({}) processing packet", user_id);
-    packet->change_context(user_id);
-    user_phv = packet->get_phv();
+    packet->change_to_user_context(user_id);
+    PHV *user_phv = packet->get_phv();
 
     // User parser
     parser = this->get_user_parser(user_id, "parser");
     if (!parser) {
-      // No user program is loaded; continue processing
       BMLOG_DEBUG_PKT(*packet, "Can't load user ({}) parser", user_id);
     } else {
       parser->parse(packet.get());
@@ -401,22 +395,20 @@ void MtPsaSwitch::egress_thread(size_t user_id) {
       egress_port = user_phv->get_field("mtpsa_output_metadata.port").get_uint();
       BMLOG_DEBUG_PKT(*packet, "User {} sending on egress port: {}", user_id, egress_port);
       packet->set_egress_port(egress_port);
+
+      Deparser *deparser = this->get_user_deparser(user_id, "deparser");
+      if (!deparser) {
+        BMLOG_DEBUG_PKT(*packet, "Can't load user ({}) deparser", user_id);
+      } else {
+        deparser->deparse(packet.get());
+      }
     }
 
-    // Admin egress deparser
+    packet->restore_admin_context();
     Deparser *deparser = this->get_deparser("egress_deparser");
-    if (!deparser) {
+    if (!deparser)
       throw std::runtime_error("Can't load admin egress deparser");
-    }
     deparser->deparse(packet.get());
-
-    // User deparser
-    deparser = this->get_user_deparser(user_id, "deparser");
-    if (!deparser) {
-      BMLOG_DEBUG_PKT(*packet, "Can't load user ({}) deparser", user_id);
-    } else {
-      deparser->deparse(packet.get());
-    }
 
     output_buffer.push_front(std::move(packet));
   }
