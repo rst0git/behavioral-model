@@ -363,21 +363,22 @@ void MtPsaSwitch::egress_thread(size_t user_id) {
     phv->get_field("mtpsa_egress_parser_input_metadata.egress_port").set(egress_port);
 
     // Admin egress parser
-    Parser *parser = this->get_parser("egress_parser");
-    if (!parser) {
+    Parser *admin_parser = this->get_parser("egress_parser");
+    if (!admin_parser)
       throw std::runtime_error("Can't load admin egress parser");
-    }
-    parser->parse(packet.get());
+    admin_parser->parse(packet.get());
+
+    phv->get_field("mtpsa_egress_input_metadata.parser_error").set(packet->get_error_code().get());
 
     packet->change_to_user_context(user_id);
+    BMLOG_DEBUG_PKT(*packet, "User context change: {}", user_id);
     PHV *user_phv = packet->get_phv();
 
-    // User parser
-    parser = this->get_user_parser(user_id, "parser");
-    if (!parser) {
+    Parser *user_parser = this->get_user_parser(user_id, "parser");
+    if (!user_parser) {
       BMLOG_DEBUG_PKT(*packet, "Can't load user ({}) parser", user_id);
     } else {
-      parser->parse(packet.get());
+      user_parser->parse(packet.get());
 
       user_phv->get_field("mtpsa_input_metadata.port").set(user_phv->get_field("mtpsa_parser_input_metadata.port"));
       user_phv->get_field("mtpsa_input_metadata.parser_error").set(packet->get_error_code().get());
@@ -393,6 +394,7 @@ void MtPsaSwitch::egress_thread(size_t user_id) {
       packet->reset_exit();
 
       egress_port = user_phv->get_field("mtpsa_output_metadata.port").get_uint();
+
       BMLOG_DEBUG_PKT(*packet, "User {} sending on egress port: {}", user_id, egress_port);
       packet->set_egress_port(egress_port);
 
@@ -404,11 +406,22 @@ void MtPsaSwitch::egress_thread(size_t user_id) {
       }
     }
 
+    BMLOG_DEBUG_PKT(*packet, "Restore admin context");
     packet->restore_admin_context();
-    Deparser *deparser = this->get_deparser("egress_deparser");
-    if (!deparser)
+
+    phv->get_field("mtpsa_egress_input_metadata.egress_port").set(egress_port);
+    phv->get_field("mtpsa_egress_input_metadata.egress_timestamp").set(get_ts().count());
+    phv->get_field("mtpsa_egress_output_metadata.clone").set(0);
+    phv->get_field("mtpsa_egress_output_metadata.drop").set(0);
+
+    Pipeline *admin_pipeline = this->get_pipeline("egress");
+    admin_pipeline->apply(packet.get());
+    packet->reset_exit();
+
+    Deparser *admin_deparser = this->get_deparser("egress_deparser");
+    if (!admin_deparser)
       throw std::runtime_error("Can't load admin egress deparser");
-    deparser->deparse(packet.get());
+    admin_deparser->deparse(packet.get());
 
     output_buffer.push_front(std::move(packet));
   }
