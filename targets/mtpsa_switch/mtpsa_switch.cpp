@@ -284,6 +284,7 @@ MtPsaSwitch::ingress_thread() {
     phv->get_field("mtpsa_ingress_output_metadata.drop").set(1);
     phv->get_field("mtpsa_ingress_output_metadata.resubmit").set(0);
     phv->get_field("mtpsa_ingress_output_metadata.multicast_group").set(0);
+    phv->get_field("mtpsa_ingress_output_metadata.user_id").set(0);
 
     Pipeline *ingress_mau = this->get_pipeline("ingress");
     ingress_mau->apply(packet.get());
