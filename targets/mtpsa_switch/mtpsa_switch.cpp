@@ -51,7 +51,7 @@ packet_id_t MtPsaSwitch::packet_id = 0;
 MtPsaSwitch::MtPsaSwitch()
   : Switch(true, nb_user_threads+1),
     input_buffer(1024),
-    egress_buffers(nb_user_threads+1, 64, EgressThreadMapper(nb_user_threads)),
+    egress_buffers(nb_user_threads+1, 64, EgressThreadMapper(nb_user_threads+1)),
     output_buffer(128),
     my_transmit_fn([this](port_t port_num, packet_id_t pkt_id, const char *buffer, int len)
     {
@@ -156,7 +156,7 @@ MtPsaSwitch::start_and_return_() {
 
 MtPsaSwitch::~MtPsaSwitch() {
   input_buffer.push_front(nullptr);
-  for (size_t i = 0; i < nb_user_threads; i++) {
+  for (size_t i = 0; i <= nb_user_threads; i++) {
     egress_buffers.push_front(i, nullptr);
   }
   output_buffer.push_front(nullptr);
