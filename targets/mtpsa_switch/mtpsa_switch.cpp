@@ -127,7 +127,6 @@ MtPsaSwitch::MtPsaSwitch()
 
 int
 MtPsaSwitch::receive_(port_t port_num, const char *buffer, int len) {
-  do_swap();
 
   // Allow up to 512 bytes of additional header data in packet.
   auto packet = new_packet_ptr(port_num, packet_id++, len, bm::PacketBuffer(len + 512, buffer, len));
