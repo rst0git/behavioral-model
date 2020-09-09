@@ -4,7 +4,14 @@ THRIFT_IDL = $(srcdir)/thrift/mtpsa_switch.thrift
 
 noinst_LTLIBRARIES = libmtpsaswitch.la
 
-libmtpsaswitch_la_SOURCES = mtpsa_switch.cpp mtpsa_switch.h primitives.cpp externs/mtpsa_counter.h externs/mtpsa_counter.cpp
+libmtpsaswitch_la_SOURCES = \
+mtpsa_switch.cpp \
+mtpsa_switch.h \
+primitives.cpp \
+externs/mtpsa_counter.h \
+externs/mtpsa_counter.cpp \
+externs/mtpsa_meter.h \
+externs/mtpsa_meter.cpp
 
 libmtpsaswitch_la_LIBADD = \
 $(top_builddir)/src/bm_sim/libbmsim.la \
