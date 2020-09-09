@@ -82,6 +82,7 @@ MtPsaSwitch::MtPsaSwitch()
   add_required_field("mtpsa_ingress_output_metadata", "egress_port");
 
   add_required_field("mtpsa_ingress_output_metadata", "user_id");
+  add_required_field("mtpsa_ingress_output_metadata", "user_permissions");
 
   add_required_field("mtpsa_egress_parser_input_metadata", "egress_port");
   add_required_field("mtpsa_egress_parser_input_metadata", "packet_path");
@@ -102,7 +103,7 @@ MtPsaSwitch::MtPsaSwitch()
   // User metadata fields
   add_required_user_field("mtpsa_parser_input_metadata", "port");
   add_required_user_field("mtpsa_parser_input_metadata", "packet_path");
-  
+
   add_required_user_field("mtpsa_input_metadata", "port");
   add_required_user_field("mtpsa_input_metadata", "packet_path");
   add_required_user_field("mtpsa_input_metadata", "timestamp");
@@ -213,7 +214,7 @@ MtPsaSwitch::get_time_since_epoch_us() const {
 }
 
 void
-MtPsaSwitch::set_transmit_fn(TransmitFn fn) 
+MtPsaSwitch::set_transmit_fn(TransmitFn fn)
 {
   my_transmit_fn = std::move(fn);
 }
@@ -284,11 +285,12 @@ MtPsaSwitch::ingress_thread() {
     phv->get_field("mtpsa_ingress_output_metadata.resubmit").set(0);
     phv->get_field("mtpsa_ingress_output_metadata.multicast_group").set(0);
     phv->get_field("mtpsa_ingress_output_metadata.user_id").set(0);
+    phv->get_field("mtpsa_ingress_output_metadata.user_permissions").set(0);
 
     Pipeline *ingress_mau = this->get_pipeline("ingress");
     ingress_mau->apply(packet.get());
     packet->reset_exit();
-    
+
     const auto &f_drop = phv->get_field("mtpsa_ingress_output_metadata.drop");
     if (f_drop.get_int()) {
       BMLOG_DEBUG_PKT(*packet, "Dropping packet at the end of ingress");
@@ -313,6 +315,8 @@ MtPsaSwitch::ingress_thread() {
     const auto &f_user_id = phv->get_field("mtpsa_ingress_output_metadata.user_id");
     int user_id = f_user_id.get_uint();
     BMLOG_DEBUG_PKT(*packet, "User ID: {}", user_id);
+
+    phv->set_packet_permissions(phv->get_field("mtpsa_ingress_output_metadata.user_permissions").get_uint());
 
     // handling multicast
     unsigned int mgid = 0u;
@@ -347,6 +351,7 @@ void MtPsaSwitch::egress_thread(size_t user_id) {
   while (1) {
     std::unique_ptr<Packet> packet;
     size_t egress_port;
+    unsigned user_permissions;
 
     egress_buffers.pop_back(user_id, &egress_port, &packet);
 
@@ -361,6 +366,7 @@ void MtPsaSwitch::egress_thread(size_t user_id) {
     phv->reset();
 
     phv->get_field("mtpsa_egress_parser_input_metadata.egress_port").set(egress_port);
+    user_permissions = phv->get_packet_permissions();
 
     // Admin egress parser
     Parser *admin_parser = this->get_parser("egress_parser");
@@ -373,6 +379,7 @@ void MtPsaSwitch::egress_thread(size_t user_id) {
     packet->change_to_user_context(user_id);
     BMLOG_DEBUG_PKT(*packet, "User context change: {}", user_id);
     PHV *user_phv = packet->get_phv();
+    user_phv->set_packet_permissions(user_permissions);
 
     Parser *user_parser = this->get_user_parser(user_id, "parser");
     if (!user_parser) {

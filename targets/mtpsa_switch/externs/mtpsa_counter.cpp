@@ -26,8 +26,11 @@ namespace mtpsa {
 
 void
 MTPSA_Counter::count(const Data &index) {
-  _counter->get_counter(
-      index.get<size_t>()).increment_counter(get_packet());
+  const Packet &packet = get_packet();
+  const PHV *phv = packet.get_phv();
+  const unsigned permissions = phv->get_packet_permissions();
+  if (!(permissions & MTPSA_PERM_COUNTER))
+    _counter->get_counter(index.get<size_t>()).increment_counter(packet);
 }
 
 Counter &

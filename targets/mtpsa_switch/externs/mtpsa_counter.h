@@ -25,6 +25,8 @@
 #include <bm/bm_sim/extern.h>
 #include <bm/bm_sim/counters.h>
 
+#define MTPSA_PERM_COUNTER 1
+
 namespace bm {
 
 namespace mtpsa {
